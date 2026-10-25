@@ -1,0 +1,16 @@
+# build output and dependencies
+.next/
+out/
+build/
+coverage/
+node_modules/
+package-lock.json
+next-env.d.ts
+
+# Data written by the app and the extraction script; their writers define the format.
+data/
+assets/
+jars/
+
+# Kept byte-exact as specified; a later phase implements the script to match it.
+.claude/skills/import-mods/SKILL.md

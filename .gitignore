@@ -1,0 +1,44 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# env files (only the example is committed)
+.env*
+!.env.example
+
+# local caches (CFR jar, decompiled classes, scratch output)
+/.cache/
+/tmp/
+
+# claude code personal settings
+.claude/settings.local.json
+
+# debug
+npm-debug.log*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.pem
+.idea/
+.vscode/*
+!.vscode/extensions.json
