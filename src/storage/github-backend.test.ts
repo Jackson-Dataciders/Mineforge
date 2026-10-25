@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { gitBlobSha } from "./git-sha";
 import { GitHubBackend, type GitHubApi } from "./github-backend";
-import { ConflictError } from "./types";
+import { ConflictError, ValidationError } from "./types";
 
 const bytes = (s: string) => new TextEncoder().encode(s);
 const httpError = (status: number, message: string) =>
@@ -19,6 +19,7 @@ function fakeGitHub(initial: Record<string, string>) {
   let n = 0;
   const state = {
     files,
+    blobs,
     refUpdates: 0,
     /** Called before each ref update; return an error to throw it. */
     beforeUpdateRef: (() => undefined) as () => Error | undefined,
@@ -94,6 +95,9 @@ function fakeGitHub(initial: Record<string, string>) {
       return sha;
     },
     async createTree(_base, entries) {
+      if (entries.some((e) => e.sha !== null && !blobs.has(e.sha))) {
+        throw httpError(422, "GitTree tree.sha is not a valid blob");
+      }
       const sha = `t${++n}`;
       trees.set(sha, entries);
       return sha;
@@ -214,5 +218,26 @@ describe("GitHubBackend", () => {
       }),
     ).rejects.toBeInstanceOf(ConflictError);
     expect(state.refUpdates).toBe(3);
+  });
+
+  it("commits blobs uploaded before (jar upload) and rejects unknown blobs", async () => {
+    const { api, state } = fakeGitHub({});
+    const jar = bytes("jar-bytes");
+    const sha = gitBlobSha(jar);
+    state.blobs.set(sha, jar);
+    const storage = new GitHubBackend(api, "main");
+    await storage.commit({
+      message: "m",
+      changes: [{ path: "jars/mods/a.jar", blobSha: sha }],
+      expected: { "jars/mods/a.jar": null },
+    });
+    expect(state.files.get("jars/mods/a.jar")).toEqual(jar);
+    await expect(
+      storage.commit({
+        message: "m",
+        changes: [{ path: "jars/mods/b.jar", blobSha: "f".repeat(40) }],
+        expected: {},
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
   });
 });

@@ -7,7 +7,7 @@ Private, single-user web app for planning Minecraft 1.21.1 NeoForge mods and mod
 - The private GitHub repo is the database. Next.js on Vercel reads and writes it through the GitHub API.
 - UI in English and German.
 
-**Current state:** phases 1 (foundation) and 2 (jar extraction, `tools/extract-jar.ts`) are done. Anything marked "planned" in `docs/architecture.md` does not exist yet.
+**Current state:** phases 1 (foundation), 2 (jar extraction, `tools/extract-jar.ts`) and 3 (Modpack Planner: library, upload, recipe changes, KubeJS export, pack tasks) are done. Anything marked "planned" in `docs/architecture.md` does not exist yet.
 
 ## Commands
 
@@ -22,7 +22,7 @@ npm run check         # lint + typecheck + test
 npx tsx tools/<script>.ts
 ```
 
-Local UI checks without GitHub credentials: the `dev-fake` config in `.claude/launch.json` sets `MINEFORGE_DEV_FAKE=1` (in-memory data, fake login, `next dev` only; ADR 0014).
+Local UI checks without GitHub credentials: the `dev-fake` config in `.claude/launch.json` sets `MINEFORGE_DEV_FAKE=1` (in-memory data with a small library/vanilla fixture, fake login, `next dev` only; ADR 0014). `MINEFORGE_DEV_SEED_DIR=<folder>` seeds it from real extracted data instead.
 
 A PostToolUse hook runs Prettier on every file Claude edits (`.claude/hooks/format.mjs`).
 

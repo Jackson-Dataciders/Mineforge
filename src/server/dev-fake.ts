@@ -16,3 +16,14 @@ export function isDevFakeMode(
 }
 
 export const DEV_FAKE_USER: AppUser = { githubId: "0", name: "Dev (fake)" };
+
+/**
+ * Optional folder with real extracted data (`data/`, `assets/textures/`) to
+ * seed the fake store from, e.g. the output of `tools/extract-jar.ts --out`.
+ * Only read in fake mode.
+ */
+export function devSeedDir(
+  env: Record<string, string | undefined> = process.env,
+): string | null {
+  return isDevFakeMode(env) ? env.MINEFORGE_DEV_SEED_DIR?.trim() || null : null;
+}

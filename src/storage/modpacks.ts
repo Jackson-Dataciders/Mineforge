@@ -1,6 +1,8 @@
 import { isPackId } from "@/domain/ids";
 import { modpackSchema, type Modpack } from "@/domain/modpack";
+import { compareCodeUnits } from "@/lib/stable-json";
 import { encodeDocument, readDocument, type Versioned } from "./documents";
+import { loadLibraryMetas } from "./library";
 import { paths } from "./paths";
 import { NotFoundError, ValidationError, type StorageBackend } from "./types";
 
@@ -80,4 +82,46 @@ export async function deleteModpack(
       [paths.modpackFile(packId)]: expectedSha,
     },
   });
+}
+
+/**
+ * Replaces the pack's library mod and custom mod references. Every ID must
+ * exist: library mods by folder (with a `meta.json`), custom mods by folder.
+ */
+export async function setModpackMods(
+  storage: StorageBackend,
+  packId: string,
+  mods: { libraryModIds: string[]; customModIds: string[] },
+  expectedSha: string,
+): Promise<Versioned<Modpack>> {
+  const current = await getModpack(storage, packId);
+  if (!current) throw new NotFoundError(`modpack ${packId}`);
+  const [libraryMetas, customDirs] = await Promise.all([
+    loadLibraryMetas(storage),
+    storage.listDir(paths.customModsDir),
+  ]);
+  const customIds = new Set(
+    customDirs.filter((e) => e.type === "dir").map((e) => e.name),
+  );
+  const unique = (ids: string[]) => [...new Set(ids)].sort(compareCodeUnits);
+  const libraryModIds = unique(mods.libraryModIds);
+  const customModIds = unique(mods.customModIds);
+  if (
+    libraryModIds.some((id) => !libraryMetas.has(id)) ||
+    customModIds.some((id) => !customIds.has(id))
+  ) {
+    throw new ValidationError("unknownMod");
+  }
+  const data = modpackSchema.parse({
+    ...current.data,
+    libraryModIds,
+    customModIds,
+  });
+  const { sha } = await storage.writeFile(
+    paths.modpackFile(packId),
+    encodeDocument(modpackSchema, data),
+    expectedSha,
+    `data: update mods of modpack ${packId}`,
+  );
+  return { data, sha };
 }

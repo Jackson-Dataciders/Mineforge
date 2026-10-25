@@ -53,6 +53,8 @@ export const libraryMetaSchema = z.strictObject({
   jarFile: z.string().min(1),
   jarSha256: z.string().regex(/^[0-9a-f]{64}$/),
   dependencies: z.array(libraryDependencySchema),
+  /** Mod logo under `assets/textures/` (`<modid>/_logo.png`), or `null` (ADR 0019). */
+  logo: z.string().regex(ICON_PATH_PATTERN).nullable().default(null),
 });
 export type LibraryMeta = z.infer<typeof libraryMetaSchema>;
 

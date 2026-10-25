@@ -1,6 +1,7 @@
 import { gitBlobSha } from "./git-sha";
 import {
   ConflictError,
+  ValidationError,
   type CommitInput,
   type DirEntry,
   type FileRef,
@@ -14,6 +15,8 @@ import {
  */
 export class MemoryBackend implements StorageBackend {
   private files = new Map<string, Uint8Array>();
+  /** Uploaded blobs by SHA, like GitHub's object store (jar upload). */
+  private blobs = new Map<string, Uint8Array>();
   private commitCount = 0;
   /** Commit messages in order, for tests. */
   readonly log: string[] = [];
@@ -82,11 +85,25 @@ export class MemoryBackend implements StorageBackend {
     this.record(message);
   }
 
+  /** Stores a blob without committing it, like `POST git/blobs`. */
+  storeBlob(content: Uint8Array): string {
+    const sha = gitBlobSha(content);
+    this.blobs.set(sha, content);
+    return sha;
+  }
+
   async commit({ message, changes, expected }: CommitInput) {
+    for (const change of changes) {
+      if ("blobSha" in change && !this.blobs.has(change.blobSha)) {
+        throw new ValidationError("unknownBlob");
+      }
+    }
     this.check(expected);
-    for (const { path, content } of changes) {
-      if (content === null) this.files.delete(path);
-      else this.files.set(path, content);
+    for (const change of changes) {
+      if ("blobSha" in change) {
+        this.files.set(change.path, this.blobs.get(change.blobSha)!);
+      } else if (change.content === null) this.files.delete(change.path);
+      else this.files.set(change.path, change.content);
     }
     return { commitSha: this.record(message) };
   }

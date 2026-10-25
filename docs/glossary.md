@@ -20,8 +20,10 @@ These terms are canonical. Use them, with exactly these meanings, in code identi
 
 **Generated task** — A task computed from entry data by a rule for the current phase. It is never stored as a task. Its stable key is `<rule-id>:<entry-id>`. Completing it advances the entry status. Code: `GeneratedTask`.
 
-**Manual task** — A task the user creates by hand, stored with its own ID in a `tasks.json`. Custom mods have manual tasks next to generated tasks; modpacks have only manual tasks. Completing one changes nothing else. Code: `ManualTask`.
+**Manual task** — A task the user creates by hand, stored with its own ID in a `tasks.json`. Custom mods have manual tasks next to generated tasks; modpacks have manual tasks next to KubeJS tasks. Completing one changes nothing else. Code: `ManualTask` (pack tasks: `type: "manual"`).
 
-**Recipe change** — One modification to a modpack's recipes: add, remove or replace a recipe. Stored as `data/modpacks/<pack-id>/recipe-changes/<change-id>.json`. Exported to KubeJS (ADR 0008). Code: `RecipeChange`.
+**KubeJS task** — A modpack task created automatically when a recipe change is saved, titled "Write KubeJS: <item name>" (the title comes from i18n, not from data). It offers "Export script" for its recipe change, is unchecked again when the change is edited, and is removed with the change (ADR 0020). Stored in the pack's `tasks.json` with `type: "kubejs"` and `recipeChangeId`. Code: `PackTask` with `type: "kubejs"`.
+
+**Recipe change** — One modification to a modpack's recipes: add, remove or replace a recipe. Stored as `data/modpacks/<pack-id>/recipe-changes/<change-id>.json`; the change ID is also its KubeJS slug. Exported to KubeJS, one script per change (ADR 0008, 0018, 0020). Code: `RecipeChange`.
 
 **Inferred data** — Library records (items, recipes) that the `import-mods` skill added from decompiled code rather than extracted from jar data files. Marked `"source": "inferred"` with an `"evidence"` field naming the class and method. The UI must show them as inferred. The opposite is `"source": "extracted"`.

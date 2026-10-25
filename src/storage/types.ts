@@ -10,8 +10,13 @@ export type DirEntry = {
 
 export type FileRef = { path: string; sha: string };
 
-/** One file in an atomic commit. `content: null` deletes the file. */
-export type FileChange = { path: string; content: Uint8Array | null };
+/**
+ * One file in an atomic commit. `content: null` deletes the file;
+ * `blobSha` adds a blob that was already uploaded (jar upload, ADR 0005).
+ */
+export type FileChange =
+  | { path: string; content: Uint8Array | null }
+  | { path: string; blobSha: string };
 
 export type CommitInput = {
   message: string;

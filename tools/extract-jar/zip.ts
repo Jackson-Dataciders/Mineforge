@@ -33,6 +33,14 @@ export function readJar(bytes: Uint8Array): {
   return { files: new Map(Object.entries(entries)), legacyEntries };
 }
 
+/** One entry of a jar by exact path, or `undefined`. */
+export function readJarEntry(
+  bytes: Uint8Array,
+  path: string,
+): Uint8Array | undefined {
+  return unzipSync(bytes, { filter: (file) => file.name === path })[path];
+}
+
 const decoder = new TextDecoder();
 
 /** UTF-8 text without a byte-order mark. */

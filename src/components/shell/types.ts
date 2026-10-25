@@ -34,6 +34,8 @@ export function viewFromPath(pathname: string): {
   selectedId: string | null;
 } {
   const [, first, second] = pathname.split("/");
+  // The mod library belongs to the Modpack Planner view (spec 03).
+  if (first === "library") return { view: "modpacks", selectedId: null };
   const view: ViewId = first === "modpacks" ? "modpacks" : "designer";
   return { view, selectedId: second ? decodeURIComponent(second) : null };
 }

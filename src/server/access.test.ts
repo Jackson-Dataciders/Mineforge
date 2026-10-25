@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { decideAccess, isAllowedGithubId, safeCallbackUrl } from "./access";
-import { isDevFakeMode } from "./dev-fake";
+import { devSeedDir, isDevFakeMode } from "./dev-fake";
 
 describe("allowlist", () => {
   it("allows only the configured numeric ID", () => {
@@ -65,5 +65,36 @@ describe("isDevFakeMode", () => {
     expect(
       isDevFakeMode({ MINEFORGE_DEV_FAKE: "true", NODE_ENV: "development" }),
     ).toBe(false);
+  });
+});
+
+describe("devSeedDir", () => {
+  const dir = "C:/seed";
+  it("is only read in fake mode", () => {
+    expect(
+      devSeedDir({
+        MINEFORGE_DEV_FAKE: "1",
+        NODE_ENV: "development",
+        MINEFORGE_DEV_SEED_DIR: dir,
+      }),
+    ).toBe(dir);
+    expect(
+      devSeedDir({
+        MINEFORGE_DEV_FAKE: "1",
+        NODE_ENV: "production",
+        MINEFORGE_DEV_SEED_DIR: dir,
+      }),
+    ).toBeNull();
+    expect(
+      devSeedDir({
+        MINEFORGE_DEV_FAKE: "1",
+        NODE_ENV: "development",
+        VERCEL: "1",
+        MINEFORGE_DEV_SEED_DIR: dir,
+      }),
+    ).toBeNull();
+    expect(
+      devSeedDir({ MINEFORGE_DEV_FAKE: "1", NODE_ENV: "development" }),
+    ).toBeNull();
   });
 });

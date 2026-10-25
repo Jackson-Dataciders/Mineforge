@@ -363,3 +363,84 @@ describe("extractJar: hostile or unusual content", () => {
     );
   });
 });
+
+describe("mod logo (ADR 0019)", () => {
+  it("copies a NeoForge logoFile from the first [[mods]] entry", () => {
+    const jar = buildJar({
+      "META-INF/neoforge.mods.toml": `logoFile="top.png"
+[[mods]]
+modId="testmod"
+logoFile="logo.png"
+`,
+      "logo.png": fakePng("logo"),
+      "top.png": fakePng("top"),
+    });
+    const result = extractJar(jar, options);
+    expect(result.meta?.logo).toBe("testmod/_logo.png");
+    expect(result.textures.get("testmod/_logo.png")).toEqual(fakePng("logo"));
+  });
+
+  it("falls back to the top-level logoFile", () => {
+    const jar = buildJar({
+      "META-INF/mods.toml": `logoFile="art/top.png"
+[[mods]]
+modId="testmod"
+`,
+      "art/top.png": fakePng("top"),
+    });
+    expect(extractJar(jar, options).textures.get("testmod/_logo.png")).toEqual(
+      fakePng("top"),
+    );
+  });
+
+  it("picks the largest Fabric icon up to 256 px", () => {
+    const jar = buildJar({
+      "fabric.mod.json": {
+        id: "fabmod",
+        icon: { "16": "i16.png", "128": "i128.png", "512": "i512.png" },
+      },
+      "i16.png": fakePng("16"),
+      "i128.png": fakePng("128"),
+      "i512.png": fakePng("512"),
+    });
+    const result = extractJar(jar, options);
+    expect(result.meta?.logo).toBe("fabmod/_logo.png");
+    expect(result.textures.get("fabmod/_logo.png")).toEqual(fakePng("128"));
+  });
+
+  it("gives null with a warning for missing or non-PNG logos, and null without one", () => {
+    const missing = extractJar(
+      buildJar({
+        "META-INF/neoforge.mods.toml": `[[mods]]
+modId="testmod"
+logoFile="gone.png"
+`,
+      }),
+      options,
+    );
+    expect(missing.meta?.logo).toBeNull();
+    expect(missing.warnings.some((w) => w.includes("missing"))).toBe(true);
+    const jpg = extractJar(
+      buildJar({
+        "META-INF/neoforge.mods.toml": `[[mods]]
+modId="testmod"
+logoFile="logo.jpg"
+`,
+        "logo.jpg": fakePng("jpg"),
+      }),
+      options,
+    );
+    expect(jpg.meta?.logo).toBeNull();
+    expect(jpg.textures.size).toBe(0);
+    const none = extractJar(
+      buildJar({
+        "META-INF/neoforge.mods.toml": `[[mods]]
+modId="testmod"
+`,
+      }),
+      options,
+    );
+    expect(none.meta?.logo).toBeNull();
+    expect(none.warnings).toEqual([]);
+  });
+});

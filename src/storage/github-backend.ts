@@ -1,4 +1,9 @@
-import { ConflictError, type CommitInput, type StorageBackend } from "./types";
+import {
+  ConflictError,
+  ValidationError,
+  type CommitInput,
+  type StorageBackend,
+} from "./types";
 
 /**
  * The GitHub REST calls the backend needs, as a narrow interface so tests
@@ -173,10 +178,12 @@ export class GitHubBackend implements StorageBackend {
     // Blobs are content-addressed, so create them once for all attempts.
     const blobShas = new Map<string, string>();
     for (const change of changes) {
-      if (change.content !== null) {
+      if ("blobSha" in change) blobShas.set(change.path, change.blobSha);
+      else if (change.content !== null) {
         blobShas.set(change.path, await this.api.createBlob(change.content));
       }
     }
+    const usesUploadedBlobs = changes.some((c) => "blobSha" in c);
 
     for (let attempt = 1; attempt <= MAX_COMMIT_ATTEMPTS; attempt++) {
       const head = await this.api.getRefSha(this.branch);
@@ -189,13 +196,22 @@ export class GitHubBackend implements StorageBackend {
       if (conflicts.length > 0) throw new ConflictError(conflicts.sort());
 
       const baseTree = await this.api.getCommitTreeSha(head);
-      const tree = await this.api.createTree(
-        baseTree,
-        changes.map((c) => ({
-          path: c.path,
-          sha: blobShas.get(c.path) ?? null,
-        })),
-      );
+      let tree: string;
+      try {
+        tree = await this.api.createTree(
+          baseTree,
+          changes.map((c) => ({
+            path: c.path,
+            sha: blobShas.get(c.path) ?? null,
+          })),
+        );
+      } catch (error) {
+        // GitHub answers 422 for a tree entry whose blob doesn't exist.
+        if (usesUploadedBlobs && statusOf(error) === 422) {
+          throw new ValidationError("unknownBlob");
+        }
+        throw error;
+      }
       const commitSha = await this.api.createCommit(message, tree, head);
       try {
         await this.api.updateRef(this.branch, commitSha);

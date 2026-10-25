@@ -1,6 +1,6 @@
 # 0017. Library data format
 
-- **Status:** accepted
+- **Status:** accepted (`meta.json` `logo` field refined by [0019](0019-mod-logo-in-library-meta.md))
 - **Date:** 2026-10-25
 
 ## Context

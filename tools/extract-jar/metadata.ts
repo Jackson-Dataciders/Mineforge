@@ -9,8 +9,11 @@ import { compareCodeUnits } from "../../src/lib/stable-json";
 import { readJson, text, type JarFiles } from "./zip";
 
 /** Metadata read from the jar; the file-level fields are added by the caller. */
-export type ModMetadata = Omit<LibraryMeta, "jarFile" | "jarSha256">;
-export type JarKind = { kind: "vanilla" } | { kind: "mod"; meta: ModMetadata };
+export type ModMetadata = Omit<LibraryMeta, "jarFile" | "jarSha256" | "logo">;
+/** `logoFile`: the declared logo path inside the jar, if any (ADR 0019). */
+export type JarKind =
+  | { kind: "vanilla" }
+  | { kind: "mod"; meta: ModMetadata; logoFile: string | null };
 
 export class ExtractError extends Error {
   constructor(message: string) {
@@ -52,7 +55,7 @@ function readModsToml(
   files: JarFiles,
   path: string,
   loader: Loader,
-): ModMetadata {
+): { meta: ModMetadata; logoFile: string | null } {
   let doc: Table;
   try {
     doc = parseToml(text(files.get(path)!)) as Table;
@@ -95,7 +98,7 @@ function readModsToml(
     }
   }
 
-  return {
+  const meta: ModMetadata = {
     modId: modIds[0]!,
     name: str(first.displayName) ?? modIds[0]!,
     version,
@@ -105,6 +108,7 @@ function readModsToml(
     modIds,
     dependencies: sortDependencies(dependencies),
   };
+  return { meta, logoFile: str(first.logoFile) ?? str(doc.logoFile) ?? null };
 }
 
 const FABRIC_DEPENDENCY_FIELDS: [string, LibraryDependency["type"]][] = [
@@ -118,8 +122,23 @@ const FABRIC_DEPENDENCY_FIELDS: [string, LibraryDependency["type"]][] = [
 const fabricRange = (v: unknown): string =>
   Array.isArray(v) ? v.map(String).join(" || ") : (str(v) ?? "*");
 
+/** Fabric `icon`: a path, or sizes → paths (largest ≤ 256, else the smallest). */
+function fabricIcon(icon: unknown): string | null {
+  if (typeof icon === "string") return icon;
+  if (!isTable(icon)) return null;
+  const sizes = Object.entries(icon)
+    .map(([size, path]) => [Number(size), str(path)] as const)
+    .filter((e): e is readonly [number, string] => Number.isFinite(e[0]) && !!e[1])
+    .sort((a, b) => a[0] - b[0]);
+  const fitting = sizes.filter(([size]) => size <= 256);
+  return (fitting.at(-1) ?? sizes[0])?.[1] ?? null;
+}
+
 /** Fabric `fabric.mod.json` (ADR 0016). */
-function readFabricJson(files: JarFiles): ModMetadata {
+function readFabricJson(files: JarFiles): {
+  meta: ModMetadata;
+  logoFile: string | null;
+} {
   const doc = readJson(files, "fabric.mod.json");
   if (!isTable(doc) || !str(doc.id))
     throw new ExtractError("Invalid fabric.mod.json");
@@ -136,7 +155,7 @@ function readFabricJson(files: JarFiles): ModMetadata {
         });
     }
   }
-  return {
+  const meta: ModMetadata = {
     modId,
     name: str(doc.name) ?? modId,
     version: str(doc.version) ?? "unknown",
@@ -146,6 +165,7 @@ function readFabricJson(files: JarFiles): ModMetadata {
     modIds: [modId],
     dependencies: sortDependencies(dependencies),
   };
+  return { meta, logoFile: fabricIcon(doc.icon) };
 }
 
 /**
@@ -156,17 +176,17 @@ export function readMetadata(files: JarFiles): JarKind {
   if (files.has("META-INF/neoforge.mods.toml")) {
     return {
       kind: "mod",
-      meta: readModsToml(files, "META-INF/neoforge.mods.toml", "neoforge"),
+      ...readModsToml(files, "META-INF/neoforge.mods.toml", "neoforge"),
     };
   }
   if (files.has("META-INF/mods.toml")) {
     return {
       kind: "mod",
-      meta: readModsToml(files, "META-INF/mods.toml", "forge"),
+      ...readModsToml(files, "META-INF/mods.toml", "forge"),
     };
   }
   if (files.has("fabric.mod.json"))
-    return { kind: "mod", meta: readFabricJson(files) };
+    return { kind: "mod", ...readFabricJson(files) };
 
   const version = readJson(files, "version.json");
   if (isTable(version)) {

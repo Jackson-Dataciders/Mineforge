@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut, Settings } from "lucide-react";
+import { Library, LogOut, Settings } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import { IconButton } from "@/components/ui/button";
@@ -72,6 +73,16 @@ export function AppShell({
               />
             </div>
             <div className="ml-auto flex items-center">
+              {view === "modpacks" && (
+                <Link
+                  href="/library"
+                  aria-current={pathname === "/library" ? "page" : undefined}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium text-muted transition hover:text-text aria-[current=page]:bg-accent/13 aria-[current=page]:text-text"
+                >
+                  <Library className="size-5" aria-hidden />
+                  {t("library.link")}
+                </Link>
+              )}
               <IconButton
                 label={t("settings.open")}
                 onClick={() => setDialog("settings")}

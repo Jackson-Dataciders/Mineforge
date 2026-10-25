@@ -2,7 +2,7 @@
 
 - **Status:** implemented
 - **Date:** 2026-10-25
-- **Related ADRs:** [0006](../adr/0006-static-extraction-plus-ai-inference.md), [0007](../adr/0007-target-minecraft-1-21-1-neoforge.md), [0016](../adr/0016-import-non-neoforge-jars-with-warning.md), [0017](../adr/0017-library-data-format.md)
+- **Related ADRs:** [0006](../adr/0006-static-extraction-plus-ai-inference.md), [0007](../adr/0007-target-minecraft-1-21-1-neoforge.md), [0016](../adr/0016-import-non-neoforge-jars-with-warning.md), [0017](../adr/0017-library-data-format.md), [0019](../adr/0019-mod-logo-in-library-meta.md)
 
 ## Goal
 
@@ -68,6 +68,7 @@ Mod jars and the vanilla 1.21.1 client jar become library data (items with Engli
     - Mod IDs must match `^[a-z][a-z0-9_-]{1,63}$` (they become folder names); metadata is validated before writing.
     - Every write is checked to stay inside its data folder or `assets/textures/`.
 15. **Skill:** `import-mods` keeps its command; step 4 also ignores `forge` and `fabricloader`.
+16. **Mod logo** (added in phase 3, spec 03, ADR 0019): NeoForge/Forge `logoFile` (first `[[mods]]` entry, else top level) or Fabric `icon` (largest size ≤ 256, else the smallest). Only a `.png` present in the jar is copied, to `assets/textures/<modid>/_logo.png`; `meta.json` `logo` holds that path or `null`, with a warning for a missing or non-PNG logo.
 
 ## Acceptance criteria
 

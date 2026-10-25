@@ -12,7 +12,7 @@ import {
 import { compareCodeUnits } from "../../src/lib/stable-json";
 import { ExtractError, readMetadata } from "./metadata";
 import { resolveItemIcon, texturePath } from "./models";
-import { readJar, readJson, type JarFiles } from "./zip";
+import { readJar, readJarEntry, readJson, type JarFiles } from "./zip";
 
 export type Extraction = {
   kind: "vanilla" | "mod";
@@ -156,6 +156,33 @@ function extractTags(files: JarFiles, warnings: string[]): ItemTags {
 }
 
 /**
+ * Copies the declared mod logo to `assets/textures/<modid>/_logo.png`
+ * (ADR 0019). Only a `.png` that exists in the jar is used.
+ */
+function extractLogo(
+  bytes: Uint8Array,
+  modId: string,
+  logoFile: string | null,
+  textures: Map<string, Uint8Array>,
+  warnings: string[],
+): string | null {
+  if (!logoFile) return null;
+  const path = logoFile.replace(/^\.?\/+/, "");
+  if (!/\.png$/i.test(path)) {
+    warnings.push(`Logo ${logoFile} is not a PNG; no logo`);
+    return null;
+  }
+  const png = readJarEntry(bytes, path);
+  if (!png) {
+    warnings.push(`Logo ${logoFile} is missing from the jar; no logo`);
+    return null;
+  }
+  const iconPath = `${modId}/_logo.png`;
+  textures.set(iconPath, png);
+  return iconPath;
+}
+
+/**
  * Turns a mod jar or the vanilla 1.21.1 client jar into library data
  * (spec docs/specs/02-jar-extraction.md). Pure apart from hashing: the caller
  * writes the result.
@@ -174,6 +201,7 @@ export function extractJar(
   }
 
   let meta: LibraryMeta | null = null;
+  const textures = new Map<string, Uint8Array>();
   if (kind.kind === "mod") {
     // Validated before anything is written: modId becomes a folder name.
     const parsed = libraryMetaSchema.safeParse({
@@ -188,12 +216,18 @@ export function extractJar(
       throw new ExtractError(`Invalid mod metadata (${issues.join("; ")})`);
     }
     meta = parsed.data;
+    meta.logo = extractLogo(
+      bytes,
+      meta.modId,
+      kind.logoFile,
+      textures,
+      warnings,
+    );
   }
 
   const namespaces = meta
     ? meta.modIds.filter((id) => id !== "minecraft")
     : ["minecraft"];
-  const textures = new Map<string, Uint8Array>();
   return {
     kind: kind.kind,
     meta,
