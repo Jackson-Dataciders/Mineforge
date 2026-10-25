@@ -212,12 +212,17 @@ sequenceDiagram
   participant B as Browser
   participant H as /api/upload-token
   participant GH as GitHub API
+  participant S as Upload commit route + src/storage
   B->>B: check .jar and size ≤ 100 MB
   B->>H: request upload token (session)
   H->>GH: installation token, repo=this, contents:write
   H-->>B: token (≤ 1 h)
-  B->>GH: blobs, tree on head, commit, update ref
-  Note over B,GH: details and the ADR 0005 update are decided in the phase 3 spec
+  B->>GH: POST git/blobs per jar (base64, progress per file)
+  GH-->>B: blob SHAs
+  B->>S: POST blob SHAs + file names (small body, session)
+  S->>S: validate .jar names, target jars/mods/
+  S->>GH: one commit via the storage layer (tree on head, ref update, retry)
+  Note over B,S: ADR 0005 as written; route names in the phase 3 spec
 ```
 
 ### Import pipeline
@@ -244,11 +249,11 @@ The CFR jar and decompiled sources go in `.cache/` (created on demand, gitignore
 
 ```mermaid
 flowchart LR
-  P["recipe-changes/*.json"] --> L[Route handler loads via storage]
+  P["one recipe-changes/{change-id}.json"] --> L[Route handler loads via storage]
   I[referenced item data] --> L
   L --> X["KubeJS generator — pure, in src/domain"]
   X --> T["script text: ServerEvents.recipes(event => …)"]
-  T --> D["download as .js"]
+  T --> D["pack task: Export script → download one .js per recipe change (ADR 0018)"]
 ```
 
 ## Environment variables

@@ -21,3 +21,4 @@ An ADR records one decision that is hard to reverse or affects other features. W
 | 0015 | [Immutable custom mod and modpack IDs](0015-immutable-project-ids.md)                                            | accepted |
 | 0016 | [Import non-NeoForge jars with the loader recorded and a warning](0016-import-non-neoforge-jars-with-warning.md) | accepted |
 | 0017 | [Library data format](0017-library-data-format.md)                                                               | accepted |
+| 0018 | [One KubeJS script per recipe change](0018-kubejs-script-per-recipe-change.md)                                   | accepted |

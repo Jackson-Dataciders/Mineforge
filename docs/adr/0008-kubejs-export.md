@@ -1,6 +1,6 @@
 # 0008. Modpack recipe changes are exported as KubeJS server scripts
 
-- **Status:** accepted
+- **Status:** accepted ("one script per pack" superseded by [0018](0018-kubejs-script-per-recipe-change.md): one script per recipe change)
 - **Date:** 2026-10-25
 
 ## Context
