@@ -47,7 +47,7 @@ Keep the files sorted and formatted like the script's output, so diffs stay clea
 
 ### 4. Check dependencies
 
-Compare each imported mod's declared required dependencies (from `meta.json`) with the mods present in `data/library/`. Ignore `minecraft`, `neoforge` and `java`. List missing ones in the report; do not download them unless the user asked.
+Compare each imported mod's declared required dependencies (from `meta.json`) with the mods present in `data/library/`. Ignore `minecraft`, `neoforge`, `forge`, `fabricloader` and `java`. List missing ones in the report; do not download them unless the user asked.
 
 ### 5. Commit
 

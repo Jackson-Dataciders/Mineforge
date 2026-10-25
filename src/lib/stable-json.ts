@@ -1,9 +1,16 @@
+/**
+ * Locale-independent string order (UTF-16 code units), the same order
+ * `stableStringify` uses for object keys. Use it for every sorted repo file.
+ */
+export const compareCodeUnits = (a: string, b: string): number =>
+  a < b ? -1 : a > b ? 1 : 0;
+
 function sortKeys(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(sortKeys);
   if (value !== null && typeof value === "object") {
     return Object.fromEntries(
       Object.keys(value)
-        .sort()
+        .sort(compareCodeUnits)
         .map((key) => [key, sortKeys((value as Record<string, unknown>)[key])]),
     );
   }

@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { decodeJson, encodeJson } from "./stable-json";
+import { decodeJson, encodeJson } from "@/lib/stable-json";
 import type { StorageBackend } from "./types";
 
 /** A parsed document plus the blob SHA it was read at, for conflict-safe writes. */

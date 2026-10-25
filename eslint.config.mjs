@@ -67,6 +67,39 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    // CLI tools may use src/domain and src/lib only (relative imports).
+    files: ["tools/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            githubAccess,
+            {
+              group: [
+                "**/src/app",
+                "**/src/app/**",
+                "**/src/components",
+                "**/src/components/**",
+                "**/src/storage",
+                "**/src/storage/**",
+                "**/src/server",
+                "**/src/server/**",
+                "**/src/i18n",
+                "**/src/i18n/**",
+                "**/src/theme",
+                "**/src/theme/**",
+                "@/*",
+              ],
+              message:
+                "tools/ may import only src/domain and src/lib, with relative paths.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     // Colors only via theme tokens (ADR 0011): no hex or color functions in UI code.
     files: ["src/app/**/*.{ts,tsx}", "src/components/**/*.{ts,tsx}"],
     rules: {

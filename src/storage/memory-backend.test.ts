@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { gitBlobSha } from "./git-sha";
 import { MemoryBackend } from "./memory-backend";
-import { decodeJson, stableStringify } from "./stable-json";
+import { decodeJson, stableStringify } from "@/lib/stable-json";
 import { ConflictError } from "./types";
 
 const bytes = (s: string) => new TextEncoder().encode(s);

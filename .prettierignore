@@ -12,5 +12,5 @@ data/
 assets/
 jars/
 
-# Kept byte-exact as specified; a later phase implements the script to match it.
+# Kept byte-exact as specified (only changes recorded in ADRs, e.g. 0016).
 .claude/skills/import-mods/SKILL.md

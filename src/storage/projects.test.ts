@@ -15,7 +15,7 @@ import {
   listModpacks,
   renameModpack,
 } from "./modpacks";
-import { encodeJson } from "./stable-json";
+import { encodeJson } from "@/lib/stable-json";
 import { ConflictError, ValidationError } from "./types";
 
 describe("custom mods", () => {

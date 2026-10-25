@@ -1,5 +1,5 @@
 import { MemoryBackend } from "./memory-backend";
-import { encodeJson } from "./stable-json";
+import { encodeJson } from "@/lib/stable-json";
 
 // A 16×16 sample PNG so the texture route has something to serve.
 const SAMPLE_PNG = Uint8Array.from(

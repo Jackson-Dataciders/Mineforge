@@ -7,7 +7,7 @@ Private, single-user web app for planning Minecraft 1.21.1 NeoForge mods and mod
 - The private GitHub repo is the database. Next.js on Vercel reads and writes it through the GitHub API.
 - UI in English and German.
 
-**Current state:** phase 1 (foundation) is done: auth, storage layer, i18n, theming, app shell. Anything marked "planned" in `docs/architecture.md` does not exist yet.
+**Current state:** phases 1 (foundation) and 2 (jar extraction, `tools/extract-jar.ts`) are done. Anything marked "planned" in `docs/architecture.md` does not exist yet.
 
 ## Commands
 
@@ -67,4 +67,4 @@ Use the `new-feature` skill. It walks these steps:
 | Claude Code permissions and hooks              | `.claude/settings.json`, `.claude/hooks/`                                 |
 | Skills                                         | `.claude/skills/`: `import-mods`, `new-adr`, `new-feature`                |
 | Subagents                                      | `.claude/agents/reviewer.md` (read-only review against rules, spec, ADRs) |
-| Mod import                                     | `import-mods` skill + `tools/extract-jar.ts` (planned)                    |
+| Mod import                                     | `import-mods` skill + `tools/extract-jar.ts` (spec 02, ADR 0017)          |

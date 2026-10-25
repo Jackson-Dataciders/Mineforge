@@ -9,7 +9,7 @@ The Modpack Planner needs each library mod's items, recipes, tags and icons. Muc
 
 ## Decision
 
-- `tools/extract-jar.ts` (planned) is a deterministic script. It reads a jar and writes `data/library/<modid>/{meta,items,recipes,tags}.json` and textures under `assets/textures/<namespace>/`. For the vanilla jar it writes `data/vanilla/1.21.1/` instead. Its output is sorted and stable, so re-runs give clean diffs.
+- `tools/extract-jar.ts` is a deterministic script. It reads a jar and writes `data/library/<modid>/{meta,items,recipes,tags}.json` and textures under `assets/textures/<namespace>/`. For the vanilla jar it writes `data/vanilla/1.21.1/` instead. Its output is sorted and stable, so re-runs give clean diffs.
 - The `import-mods` skill (`.claude/skills/import-mods/SKILL.md`) runs the script locally. It then decompiles library jars with CFR and adds registrations and recipes that the script missed.
 - Every added record has `"source": "inferred"` and an `"evidence"` field naming the class and method. Extracted records have `"source": "extracted"`.
 - Inferred records are added only if the ID is fully resolvable from code; never from guesses, configs or runtime data.

@@ -20,3 +20,4 @@ An ADR records one decision that is hard to reverse or affects other features. W
 | 0014 | [Dev-only fake mode](0014-dev-only-fake-mode.md)                                                                 | accepted |
 | 0015 | [Immutable custom mod and modpack IDs](0015-immutable-project-ids.md)                                            | accepted |
 | 0016 | [Import non-NeoForge jars with the loader recorded and a warning](0016-import-non-neoforge-jars-with-warning.md) | accepted |
+| 0017 | [Library data format](0017-library-data-format.md)                                                               | accepted |

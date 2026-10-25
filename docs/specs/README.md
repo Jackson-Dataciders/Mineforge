@@ -11,8 +11,9 @@ Every feature or phase gets a spec **before** implementation starts. A spec is t
 
 ## Index
 
-| #   | Spec                           | Status      |
-| --- | ------------------------------ | ----------- |
-| 01  | [Foundation](01-foundation.md) | implemented |
+| #   | Spec                                                    | Status      |
+| --- | ------------------------------------------------------- | ----------- |
+| 01  | [Foundation](01-foundation.md)                          | implemented |
+| 02  | [Jar extraction and import skill](02-jar-extraction.md) | implemented |
 
 Add a row here for every new spec.
