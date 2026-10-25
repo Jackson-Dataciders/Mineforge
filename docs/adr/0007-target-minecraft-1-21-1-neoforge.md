@@ -1,6 +1,6 @@
 # 0007. Target Minecraft 1.21.1 on NeoForge
 
-- **Status:** accepted
+- **Status:** accepted (handling of other loaders and versions refined by [0016](0016-import-non-neoforge-jars-with-warning.md): imported with a warning, not just flagged)
 - **Date:** 2026-10-25
 
 ## Context
