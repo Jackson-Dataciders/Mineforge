@@ -1,11 +1,11 @@
 import type { NextConfig } from "next";
 
-// Defaults from create-next-app 16.4 (cacheComponents, partialPrefetching,
-// Tailwind via the Turbopack loader). See node_modules/next/dist/docs/.
+// Cache Components and Partial Prefetching are off: every page is private and
+// rendered per request, and the root layout reads theme/locale cookies
+// (ADR 0013). Tailwind runs through the Turbopack loader (no PostCSS config).
+// See node_modules/next/dist/docs/.
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  cacheComponents: true,
-  partialPrefetching: true,
   turbopack: {
     rules: {
       "*.css": {

@@ -1,6 +1,6 @@
 # 0004. Auth.js with GitHub login, allowlisted to one GitHub user ID
 
-- **Status:** accepted
+- **Status:** accepted (where the session is re-checked is refined by [0013](0013-dynamic-rendering-session-checks.md))
 - **Date:** 2026-10-25
 
 ## Context

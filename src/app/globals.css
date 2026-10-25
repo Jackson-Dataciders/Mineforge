@@ -1,24 +1,42 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Colors come only from the semantic theme tokens (ADR 0011). The values are
+ * rendered from src/theme/tokens.ts by the root layout; Tailwind's default
+ * palette is removed so raw palette classes cannot be used.
+ */
+@theme {
+  --color-*: initial;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-secondary: var(--secondary);
+  --color-ok: var(--ok);
+  --color-slot: var(--slot);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, sans-serif;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, sans-serif;
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  dialog::backdrop {
+    background: color-mix(in srgb, var(--text) 40%, transparent);
+  }
 }

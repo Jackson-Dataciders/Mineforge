@@ -7,7 +7,7 @@ Private, single-user web app for planning Minecraft 1.21.1 NeoForge mods and mod
 - The private GitHub repo is the database. Next.js on Vercel reads and writes it through the GitHub API.
 - UI in English and German.
 
-**Current state:** phase 0 (setup only). Anything marked "planned" in `docs/architecture.md` does not exist yet.
+**Current state:** phase 1 (foundation) is done: auth, storage layer, i18n, theming, app shell. Anything marked "planned" in `docs/architecture.md` does not exist yet.
 
 ## Commands
 
@@ -22,12 +22,14 @@ npm run check         # lint + typecheck + test
 npx tsx tools/<script>.ts
 ```
 
+Local UI checks without GitHub credentials: the `dev-fake` config in `.claude/launch.json` sets `MINEFORGE_DEV_FAKE=1` (in-memory data, fake login, `next dev` only; ADR 0014).
+
 A PostToolUse hook runs Prettier on every file Claude edits (`.claude/hooks/format.mjs`).
 
 ## Hard rules
 
 1. **The repo stays private.** It holds third-party jars and textures that may not be redistributed (ADR 0003).
-2. **Every page and route requires the allowlisted login.** This means `src/proxy.ts` plus `requireUser()` (both planned) in each route handler and the root layout. The app serves private, licensed data on a public URL (ADR 0004).
+2. **Every page and route requires the allowlisted login.** This means `src/proxy.ts`, plus `requireUser()` in the `(app)` layout and every page, and `apiRoute()` around every route handler (ADR 0013). The app serves private, licensed data on a public URL (ADR 0004).
 3. **No textures or icons in `public/`.** Next.js serves `public/` without auth; images go through the authenticated texture route (ADR 0004).
 4. **All data access goes through `src/storage/`.** Never call GitHub from components or routes directly; SHA checks and atomic commits live in one place (ADR 0002). ESLint enforces this.
 5. **Code is English:** identifiers, file names, comments, docs and commit messages. That keeps one vocabulary (see `docs/glossary.md`).
@@ -38,6 +40,7 @@ A PostToolUse hook runs Prettier on every file Claude edits (`.claude/hooks/form
 10. **`main` receives runtime commits from the app.** Run `git pull --rebase` before starting work. Never force-push or rewrite history.
 11. **No secrets in the repo.** Env vars are listed in `.env.example`; real values live in `.env.local` and Vercel.
 12. **Use the glossary terms exactly** (`docs/glossary.md`) in code and UI.
+13. **Colors only via theme tokens** (`bg-surface`, `text-muted`, `bg-accent/13`, …; ADR 0011), never hex values or palette classes. Every new text/background pair goes into `src/theme/tokens.test.ts` first, because all six variants must meet WCAG AA.
 
 ## Workflow for every feature
 

@@ -1,6 +1,6 @@
 # Architecture decision records
 
-An ADR records one decision that is hard to reverse or affects other features. Write a new one with the `new-adr` skill, starting from [0000-template.md](0000-template.md). Never rewrite an accepted ADR's decision. To change a decision, add a new ADR and set the old one's status to "superseded by NNNN".
+An ADR records one decision that is hard to reverse or affects other features. Write a new one with the `new-adr` skill, starting from [0000-template.md](0000-template.md). Never rewrite an accepted ADR's decision. To change a decision, add a new ADR and set the old one's status to "superseded by NNNN". If the new ADR changes only one point of an older decision, the old status becomes "accepted (… refined by NNNN)" and names the point.
 
 | #    | Decision                                                                                                     | Status   |
 | ---- | ------------------------------------------------------------------------------------------------------------ | -------- |
@@ -14,3 +14,8 @@ An ADR records one decision that is hard to reverse or affects other features. W
 | 0008 | [KubeJS server scripts for modpack recipe changes](0008-kubejs-export.md)                                    | accepted |
 | 0009 | [Entry types as Zod discriminated unions](0009-entry-types-zod-discriminated-unions.md)                      | accepted |
 | 0010 | [Designer tasks derived from data](0010-derived-designer-tasks.md)                                           | accepted |
+| 0011 | [Theming with semantic tokens from one source](0011-theming-semantic-tokens.md)                              | accepted |
+| 0012 | [i18n with a typed in-repo catalog](0012-i18n-typed-catalog.md)                                              | accepted |
+| 0013 | [Dynamic rendering; session check per segment](0013-dynamic-rendering-session-checks.md)                     | accepted |
+| 0014 | [Dev-only fake mode](0014-dev-only-fake-mode.md)                                                             | accepted |
+| 0015 | [Immutable custom mod and modpack IDs](0015-immutable-project-ids.md)                                        | accepted |

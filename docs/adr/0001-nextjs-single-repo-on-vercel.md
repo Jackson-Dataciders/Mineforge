@@ -1,6 +1,6 @@
 # 0001. Next.js App Router, TypeScript, React and Tailwind on Vercel in one repo
 
-- **Status:** accepted
+- **Status:** accepted (`cacheComponents` is turned off by [0013](0013-dynamic-rendering-session-checks.md))
 - **Date:** 2026-10-25
 
 ## Context

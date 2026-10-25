@@ -2,7 +2,10 @@
 
 **Status markers:** parts marked **(planned)** do not exist yet; do not import or call them until a phase implements them. Unmarked parts exist now. When a phase implements a planned part, remove its marker in the same change.
 
-Phase 0 status: tooling, docs and the folder skeleton exist. No app features, routes, auth, storage, schemas or tools exist yet.
+**Current state, phase 1 (foundation, spec `docs/specs/01-foundation.md`):**
+
+- exists: auth, proxy, storage layer, texture/icon routes, i18n, theming, app shell, and create/rename/delete for custom mods and modpacks;
+- planned: entries, library, uploads, recipes, tasks, mind map and the extraction tool.
 
 ## System overview
 
@@ -12,9 +15,9 @@ flowchart LR
     UI[Next.js UI]
   end
   subgraph Vercel
-    Proxy["src/proxy.ts (planned)"]
+    Proxy["src/proxy.ts"]
     RSC[Server components + route handlers]
-    Storage["src/storage (planned)"]
+    Storage["src/storage"]
   end
   subgraph GitHub
     OAuth[GitHub OAuth]
@@ -26,7 +29,7 @@ flowchart LR
   end
   UI --> Proxy --> RSC --> Storage -->|REST API, GitHub App token| Repo
   UI -->|login| OAuth
-  UI -->|jar blob upload, scoped token| Repo
+  UI -->|"jar upload, scoped token (planned)"| Repo
   CC --> Tool
   CC -->|git pull / commit / push| Repo
   Repo -->|push to main triggers build unless data-only| Vercel
@@ -34,46 +37,77 @@ flowchart LR
 
 ## Components
 
-| Component         | Responsibility                                                                                                      | Status                  |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| Next.js app       | UI for Mod Designer and Modpack Planner, server components, route handlers (ADR 0001)                               | scaffold                |
-| Proxy             | `src/proxy.ts`: rejects every request without an allowlisted session (ADR 0004)                                     | planned                 |
-| Auth              | Auth.js GitHub provider, allowlist check, `requireUser()` (ADR 0004)                                                | planned                 |
-| Storage layer     | Typed read/write of JSON and PNG documents in the repo, SHA checks, atomic multi-file commits, conflicts (ADR 0002) | planned                 |
-| GitHub App client | Installation tokens; scoped upload tokens for jars (ADR 0003, 0005)                                                 | planned                 |
-| Texture route     | `/api/textures/[...path]`: serves PNGs from `assets/` behind auth (ADR 0004)                                        | planned                 |
-| Domain            | Zod schemas, task rules, recipe model, KubeJS export; pure functions (ADR 0008–0010)                                | planned                 |
-| i18n              | English and German UI strings, locale switch                                                                        | planned                 |
-| Extraction script | `tools/extract-jar.ts`: deterministic jar → data (ADR 0006)                                                         | planned                 |
-| import-mods skill | `.claude/skills/import-mods/SKILL.md`: runs the script, adds inferred data, commits (ADR 0006)                      | exists (script planned) |
-| Vercel build skip | `vercel.json` `ignoreCommand`: skips builds for commits touching only `data/`, `assets/`, `jars/` (ADR 0002)        | configured              |
+| Component         | Responsibility                                                                                                        | Status                  |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| Next.js app       | UI for Mod Designer and Modpack Planner, server components, route handlers (ADR 0001, 0013)                           | exists                  |
+| Proxy             | `src/proxy.ts`: every request needs the allowlisted session; pages → `/sign-in`, API → 401 (ADR 0004)                 | exists                  |
+| Auth              | `src/server/auth.ts` (Auth.js, GitHub provider, allowlist), `src/server/session.ts` (`requireUser`, `getAllowedUser`) | exists                  |
+| Storage layer     | `src/storage/`: backend interface, GitHub and in-memory backends, documents, repositories (ADR 0002)                  | exists                  |
+| GitHub App client | `src/server/github-app.ts`: one installation token per request, repo-scoped, contents write (ADR 0003)                | exists                  |
+| Texture routes    | `/api/textures/[...path]` → `assets/textures/`, `/api/icons/[...path]` → `assets/icons/`, behind auth (ADR 0004)      | exists                  |
+| i18n              | `src/i18n/`: typed en/de catalogs, cookie locale (ADR 0012)                                                           | exists                  |
+| Theming           | `src/theme/`: tokens for 3 themes × light/dark, CSS render, contrast test (ADR 0011)                                  | exists                  |
+| App shell         | `src/components/shell/`: view switcher, project selector with create/rename/delete, settings                          | exists                  |
+| Dev fake mode     | In-memory storage + fake login under `next dev` only (ADR 0014)                                                       | exists                  |
+| Domain            | `src/domain/`: IDs, `mod.json`/`pack.json` schemas; entry schemas, task rules, recipe model, KubeJS export (planned)  | partial                 |
+| Upload token      | Scoped token for direct jar upload (ADR 0005)                                                                         | planned                 |
+| Extraction script | `tools/extract-jar.ts`: deterministic jar → data (ADR 0006)                                                           | planned                 |
+| import-mods skill | `.claude/skills/import-mods/SKILL.md`: runs the script, adds inferred data, commits (ADR 0006)                        | exists (script planned) |
+| Vercel build skip | `vercel.json` `ignoreCommand`: skips builds for commits touching only `data/`, `assets/`, `jars/` (ADR 0002)          | configured              |
 
 ## Source layers
 
-| Folder            | Contains                                                                                                          | May import                             |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `src/app/`        | Routes: pages, layouts, route handlers (`src/app/api/`, planned). Thin: parse input, call down, render.           | everything below                       |
-| `src/components/` | React components, grouped by feature (planned: `components/designer/`, `components/modpacks/`, `components/ui/`). | `domain`, `i18n`, `lib`                |
-| `src/domain/`     | Pure TypeScript: Zod schemas and inferred types, task rules, recipe model, KubeJS export.                         | `lib` only (no I/O, React, Next, Node) |
-| `src/storage/`    | The only code that reads or writes repo data. Exposes typed functions per document kind.                          | `domain`, `server`, `lib`              |
-| `src/server/`     | Server-only infrastructure: env parsing, Auth.js config, `requireUser()`, GitHub App tokens.                      | `lib`                                  |
-| `src/i18n/`       | Message catalogs `en` and `de` and lookup helpers. The library is chosen by ADR in the i18n phase.                | `lib`                                  |
-| `src/lib/`        | Small generic helpers (e.g. `assert-never.ts`).                                                                   | nothing app-specific                   |
-| `tools/`          | CLI scripts run with `npx tsx tools/<script>.ts`.                                                                 | `domain`, `lib`                        |
+| Folder            | Contains                                                                                                                                                | May import                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `src/app/`        | Routes: pages, layouts (`(app)` group = signed-in shell), route handlers in `src/app/api/` wrapped in `apiRoute()` (`src/app/api/_lib/route.ts`). Thin. | everything below                       |
+| `src/components/` | React components: `ui/` (Button, IconButton, Dialog, TextField, Toast), `shell/`; later `designer/`, `modpacks/` (planned).                             | `domain`, `i18n`, `theme`, `lib`       |
+| `src/domain/`     | Pure TypeScript: Zod schemas and inferred types, ID rules; later task rules, recipe model, KubeJS export.                                               | `lib` only (no I/O, React, Next, Node) |
+| `src/storage/`    | The only code that reads or writes repo data. `getStorage()` and cached loaders in `index.ts`; repositories per document kind.                          | `domain`, `server`, `lib`              |
+| `src/server/`     | Server-only infrastructure: `env.ts`, `auth.ts`, `session.ts`, `access.ts` (pure rules), `github-app.ts`, `dev-fake.ts`.                                | `lib`                                  |
+| `src/i18n/`       | `messages/en.ts` (source of keys), `messages/de.ts`, `locale.ts`, `server.ts` (`getT`), `client.tsx` (`useT`).                                          | `lib`                                  |
+| `src/theme/`      | `tokens.ts` (all colors), `render-css.ts`, `contrast.ts`.                                                                                               | nothing                                |
+| `src/lib/`        | Small generic helpers (`assert-never`, `fetch-json`, `preferences`).                                                                                    | nothing app-specific                   |
+| `tools/`          | CLI scripts run with `npx tsx tools/<script>.ts`.                                                                                                       | `domain`, `lib`                        |
 
 ESLint (`eslint.config.mjs`) enforces the key boundaries:
 
 - `@octokit/*` is only allowed in `src/storage/` and `src/server/`.
 - `src/components/` must not import `@/storage` or `@/server`.
 - `src/domain/` must not import React, Next, Node built-ins or upper layers.
+- `src/app/` and `src/components/` must not contain hex colors or color functions (ADR 0011).
 
-Client components get data from server components or by calling route handlers; they never call GitHub.
+**Data access rules:**
 
-Tests are colocated as `*.test.ts(x)` and run with Vitest in a Node environment. The storage layer gets an in-memory backend for tests (planned), so features are tested without GitHub.
+- Server components read through the storage layer (`loadCustomMods()`, …).
+- Client components get data as props or from route handlers; they never call GitHub.
+- Mutations go through route handlers that call storage functions. The client sends the blob SHA it read; on `409 { error: "conflict" }` it calls `router.refresh()` and shows `errors.conflict`.
+
+**Tests:** colocated `*.test.ts(x)`, run with Vitest in Node. Storage logic is tested on `MemoryBackend` (same semantics as GitHub, real blob SHAs); `GitHubBackend` is tested against a fake `GitHubApi`.
+
+## Storage layer
+
+- **`StorageBackend`** (`src/storage/types.ts`):
+  - `readFile`, `listDir`, `listFilesRecursive`
+  - `writeFile(path, content, expectedSha | null)`: create-only when `null`
+  - `deleteFile`
+  - `commit({ message, changes, expected })`
+- **`GitHubBackend`:**
+  - Single files use the Contents API with the blob SHA. A 409 is retried once if the file itself is unchanged.
+  - A multi-file `commit`:
+    - creates the blobs;
+    - reads the head and checks every `expected` SHA there (mismatch → `ConflictError`, nothing written);
+    - creates the tree on `base_tree` (deletions are `sha: null`), then the commit;
+    - fast-forwards the ref. On a non-fast-forward it rebuilds at the new head, up to 3 attempts, then raises `ConflictError`.
+- **Errors:**
+  - `ConflictError`, `NotFoundError`, `ValidationError(code)`.
+  - Use the name-based guards (`isConflictError`, …), not `instanceof` (ADR 0014).
+  - `apiRoute()` maps them to 409 / 404 / 400.
+- **Documents:** `readDocument(storage, path, schema)` returns `{ data, sha }` validated by Zod. `encodeDocument(schema, value)` validates and serializes with `stableStringify` (sorted keys, 2 spaces, trailing newline).
+- **Commit messages:** `data: <verb> <kind> <id>`, e.g. `data: create custom mod iron_works`.
 
 ## Data layout
 
-All paths are relative to the repo root. The folders exist; the data files are planned and appear as phases implement them. File formats are summarized here; once implemented, the Zod schemas in `src/domain/` (planned) are the source of truth. All IDs are namespaced Minecraft IDs (`namespace:path`) unless noted.
+All paths are relative to the repo root. Files appear as phases implement them; the Zod schemas in `src/domain/` are the source of truth for every implemented format. All Minecraft IDs are namespaced (`namespace:path`).
 
 ```
 jars/vanilla/                       vanilla 1.21.1 client jar
@@ -87,29 +121,29 @@ assets/icons/<custom-modid>/        16×16 PNG icons drawn in the pixel editor, 
 tools/extract-jar.ts                (planned)
 ```
 
-| File                                                      | Holds (high level)                                                                              | Written by         |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------ |
-| `data/vanilla/1.21.1/items.json`, library `items.json`    | array of `{ id, name (English), icon (path under assets/textures or null), source, evidence? }` | extraction + skill |
-| `.../recipes.json`                                        | array of `{ id, type, ingredients/result as in 1.21.1 recipe JSON, source, evidence? }`         | extraction + skill |
-| `.../tags.json`                                           | item tags: `{ "<tag-id>": ["<item-id>" or "#<tag-id>", ...] }`                                  | extraction         |
-| `data/library/<modid>/meta.json`                          | mod ID, name, version, loader, Minecraft version, jar path, jar hash, declared dependencies     | extraction         |
-| `data/custom-mods/<modid>/mod.json`                       | mod ID, name, description, current phase                                                        | app                |
-| `data/custom-mods/<modid>/layout.json`                    | mind map node positions per entry ID                                                            | app                |
-| `data/custom-mods/<modid>/tasks.json`                     | manual tasks; per-key state for generated tasks if the Designer spec needs it                   | app                |
-| `data/custom-mods/<modid>/entries/<entry-id>.json`        | one entry: `id, type, kind?, name, status`, type-specific fields, recipes, relations, icon      | app                |
-| `data/modpacks/<pack-id>/pack.json`                       | pack ID, name, referenced library mod IDs and custom mod IDs                                    | app                |
-| `data/modpacks/<pack-id>/tasks.json`                      | manual tasks                                                                                    | app                |
-| `data/modpacks/<pack-id>/recipe-changes/<change-id>.json` | one recipe change: action (add / remove / replace), target, new recipe                          | app                |
+| File                                                      | Holds (high level)                                                                                                | Written by         | Status  |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------ | ------- |
+| `data/custom-mods/<modid>/mod.json`                       | `customModSchema`: `{ modId, name, phase ("planning"), dependencies: [] }`; later phases add fields with defaults | app                | exists  |
+| `data/modpacks/<pack-id>/pack.json`                       | `modpackSchema`: `{ id, name, libraryModIds: [], customModIds: [] }`                                              | app                | exists  |
+| `data/vanilla/1.21.1/items.json`, library `items.json`    | array of `{ id, name (English), icon (path under assets/textures or null), source, evidence? }`                   | extraction + skill | planned |
+| `.../recipes.json`                                        | array of `{ id, type, ingredients/result as in 1.21.1 recipe JSON, source, evidence? }`                           | extraction + skill | planned |
+| `.../tags.json`                                           | item tags: `{ "<tag-id>": ["<item-id>" or "#<tag-id>", ...] }`                                                    | extraction         | planned |
+| `data/library/<modid>/meta.json`                          | mod ID, name, version, loader, Minecraft version, jar path, jar hash, declared dependencies                       | extraction         | planned |
+| `data/custom-mods/<modid>/layout.json`                    | mind map node positions per entry ID                                                                              | app                | planned |
+| `data/custom-mods/<modid>/tasks.json`                     | manual tasks; per-key state for generated tasks if the Designer spec needs it                                     | app                | planned |
+| `data/custom-mods/<modid>/entries/<entry-id>.json`        | one entry: `id, type, kind?, name, status`, type-specific fields, recipes, relations, icon                        | app                | planned |
+| `data/modpacks/<pack-id>/tasks.json`                      | pack tasks                                                                                                        | app                | planned |
+| `data/modpacks/<pack-id>/recipe-changes/<change-id>.json` | one recipe change: action (add / remove / replace), target, new recipe                                            | app                | planned |
 
-Rules:
+**Rules:**
 
-- `data/custom-mods/` and `data/modpacks/` are written only by the app.
-- `data/library/` and `data/vanilla/` are written only by the import.
-- Prettier ignores `data/`, `assets/` and `jars/`; their writers define the formatting (sorted keys and arrays, 2-space JSON, trailing newline).
+- `data/custom-mods/` and `data/modpacks/` are written only by the app; `data/library/` and `data/vanilla/` only by the import.
+- Custom mod and modpack IDs are immutable folder names; deleting a custom mod also removes it from every pack, in one commit (ADR 0015).
+- Prettier ignores `data/`, `assets/` and `jars/`; their writers define the formatting.
 
 ## Flows
 
-### Login and authorization (planned)
+### Login and authorization
 
 ```mermaid
 sequenceDiagram
@@ -119,22 +153,22 @@ sequenceDiagram
   participant G as GitHub OAuth
   participant R as Route / page
   B->>P: GET /any
-  P->>P: session cookie valid?
+  P->>P: allowlisted session?
   alt no session
-    P-->>B: redirect to sign-in (pages) / 401 (API)
-    B->>A: sign in with GitHub
+    P-->>B: redirect /sign-in?callbackUrl (pages) / 401 (API)
+    B->>A: sign in with GitHub (/sign-in form)
     A->>G: OAuth
-    G-->>A: profile (numeric user ID)
+    G-->>A: account (numeric providerAccountId)
     A->>A: id == ALLOWED_GITHUB_USER_ID?
-    A-->>B: session cookie, or access denied
+    A-->>B: JWT session cookie, or /sign-in?error=AccessDenied
   else session ok
     P->>R: forward
-    R->>R: requireUser() (defense in depth)
+    R->>R: requireUser() / apiRoute() (ADR 0013)
     R-->>B: response
   end
 ```
 
-### Read and write via the storage layer (planned)
+### Read and write via the storage layer
 
 ```mermaid
 sequenceDiagram
@@ -142,27 +176,26 @@ sequenceDiagram
   participant H as Route handler
   participant S as src/storage
   participant GH as GitHub API
-  U->>H: load entry
-  H->>S: readEntry(mod, id)
+  U->>H: load (or server component reads directly)
+  H->>S: readDocument(path, schema)
   S->>GH: GET contents (path)
   GH-->>S: content + blob SHA
   S->>S: Zod parse
-  S-->>U: entry + sha
-  U->>H: save(entry, baseSha)
-  H->>S: writeEntry(entry, baseSha)
+  S-->>U: data + sha
+  U->>H: save(data, sha)
+  H->>S: writeFile / commit with expected SHAs
   S->>S: Zod validate
   alt single file
-    S->>GH: PUT contents with sha=baseSha
+    S->>GH: PUT contents with sha
   else several files
-    S->>GH: create blobs, tree (base = head commit), commit
-    S->>GH: PATCH ref (no force)
+    S->>GH: blobs, read head, check expected SHAs, tree, commit
+    S->>GH: PATCH ref (no force), retry on non-fast-forward
   end
-  alt SHA or ref mismatch (409/422)
-    S-->>U: ConflictError
-    U->>H: reload current version
+  alt SHA mismatch
+    S-->>U: 409 conflict
+    U->>U: router.refresh() + conflict message
     Note over U: user re-applies the change, never overwrites
   else ok
-    GH-->>S: new commit + SHAs
     S-->>U: saved + new sha
   end
 ```
@@ -172,20 +205,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant B as Browser
-  participant H as /api/uploads/token
+  participant H as /api/upload-token
   participant GH as GitHub API
-  participant C as /api/uploads/commit
-  participant S as src/storage
-  B->>B: check size ≤ 100 MB
+  B->>B: check .jar and size ≤ 100 MB
   B->>H: request upload token (session)
   H->>GH: installation token, repo=this, contents:write
   H-->>B: token (≤ 1 h)
-  B->>GH: POST git/blobs (base64 jar)
-  GH-->>B: blob SHA
-  B->>C: { blobSha, fileName }
-  C->>S: commitFiles(jars/mods/<file> = blobSha)
-  S->>GH: tree + commit + ref update
-  C-->>B: done (import runs later via Claude Code)
+  B->>GH: blobs, tree on head, commit, update ref
+  Note over B,GH: details and the ADR 0005 update are decided in the phase 3 spec
 ```
 
 ### Import pipeline (script planned, skill exists)
@@ -212,19 +239,30 @@ The CFR jar and decompiled sources go in `.cache/` (created on demand, gitignore
 
 ```mermaid
 flowchart LR
-  P["pack.json + recipe-changes/*.json"] --> L[Route handler loads via storage]
-  I[referenced library / custom item data] --> L
-  L --> X["exportKubeJs(changes, items) — pure, in src/domain"]
+  P["recipe-changes/*.json"] --> L[Route handler loads via storage]
+  I[referenced item data] --> L
+  L --> X["KubeJS generator — pure, in src/domain"]
   X --> T["script text: ServerEvents.recipes(event => …)"]
-  T --> D["download as kubejs/server_scripts/<pack-id>.js"]
+  T --> D["download as .js"]
 ```
 
 ## Environment variables
 
-Listed in `.env.example`; none are read yet. Parse and validate them in `src/server/` (planned), never with `process.env` scattered in features.
+All of them are listed in `.env.example`.
+
+- **Auth.js** reads `AUTH_SECRET`, `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET` itself.
+- **`src/server/env.ts`** reads:
+  - `ALLOWED_GITHUB_USER_ID` (`allowedGithubUserId()`)
+  - the GitHub App and repo variables (`githubEnv()`, validated on use)
+- **`MINEFORGE_DEV_FAKE=1`** enables fake mode under `next dev` (ADR 0014).
+
+Never read `process.env` in features.
 
 ## Framework notes
 
-- Next.js 16.4 with defaults from create-next-app: `cacheComponents`, `partialPrefetching`, and Tailwind v4 through the `@tailwindcss/turbopack` loader (no PostCSS config). The middleware file is called `proxy.ts`.
+- Next.js 16.4 with Cache Components and Partial Prefetching **off** (ADR 0013), and Tailwind v4 through the `@tailwindcss/turbopack` loader (no PostCSS config).
+- The middleware file is `src/proxy.ts`. Auth.js is `next-auth@5.0.0-beta.32`, pinned.
+- Route handler and page props use the generated global types (`PageProps<"/route">`, `LayoutProps`); `npm run typecheck` runs `next typegen` first.
 - There is no `public/` folder. Next.js serves it without auth, so textures and icons never go there (ADR 0004).
 - Version-matched Next.js docs are in `node_modules/next/dist/docs/`; `AGENTS.md` is maintained by `next dev` and says the same.
+- Local runs: `.claude/launch.json` has `dev-fake` (port 3100, fake mode) and `dev` (real auth). Only one `next dev` can run per folder.

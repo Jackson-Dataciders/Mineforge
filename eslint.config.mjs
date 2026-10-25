@@ -14,6 +14,9 @@ const storageAndServer = {
     "Components never touch storage or server code; go through a route handler or server component.",
 };
 
+const RAW_COLOR =
+  "Use theme token classes (bg-surface, text-muted, …), not raw colors (ADR 0011).";
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -59,6 +62,25 @@ const eslintConfig = defineConfig([
                 "src/domain is pure TypeScript: no I/O, React or framework imports.",
             },
           ],
+        },
+      ],
+    },
+  },
+  {
+    // Colors only via theme tokens (ADR 0011): no hex or color functions in UI code.
+    files: ["src/app/**/*.{ts,tsx}", "src/components/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "Literal[value=/#[0-9a-fA-F]{3}|rgba?[(]|hsla?[(]|okl[ac][bh][(]/]",
+          message: RAW_COLOR,
+        },
+        {
+          selector:
+            "TemplateElement[value.raw=/#[0-9a-fA-F]{3}|rgba?[(]|hsla?[(]|okl[ac][bh][(]/]",
+          message: RAW_COLOR,
         },
       ],
     },

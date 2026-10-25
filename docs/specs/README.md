@@ -11,7 +11,8 @@ Every feature or phase gets a spec **before** implementation starts. A spec is t
 
 ## Index
 
-| #   | Spec | Status |
-| --- | ---- | ------ |
+| #   | Spec                           | Status      |
+| --- | ------------------------------ | ----------- |
+| 01  | [Foundation](01-foundation.md) | implemented |
 
-No specs yet. Add a row here for every new spec.
+Add a row here for every new spec.
