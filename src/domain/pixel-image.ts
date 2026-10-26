@@ -44,6 +44,41 @@ export function setPixel(
   return next;
 }
 
+/**
+ * Sets every pixel on the line from (x0, y0) to (x1, y1) (Bresenham), so a
+ * fast stroke leaves no gaps between pointer events.
+ */
+export function drawLine(
+  image: PixelImage,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  color: Rgba,
+): PixelImage {
+  let result = image;
+  const dx = Math.abs(x1 - x0);
+  const dy = -Math.abs(y1 - y0);
+  const sx = x0 < x1 ? 1 : -1;
+  const sy = y0 < y1 ? 1 : -1;
+  let error = dx + dy;
+  let x = x0;
+  let y = y0;
+  for (;;) {
+    result = setPixel(result, x, y, color);
+    if (x === x1 && y === y1) return result;
+    const e2 = 2 * error;
+    if (e2 >= dy) {
+      error += dy;
+      x += sx;
+    }
+    if (e2 <= dx) {
+      error += dx;
+      y += sy;
+    }
+  }
+}
+
 /** 4-neighbour flood fill of the area with the start pixel's color. */
 export function floodFill(
   image: PixelImage,

@@ -16,7 +16,7 @@ KubeJS loads every `.js` file under `kubejs/server_scripts/`, subfolders include
 
 ## Decision
 
-- **Generator:** a pure function in `src/domain/` (planned) takes one recipe change plus the data it references and returns one complete server script containing a single `ServerEvents.recipes(event => { ... })` block. It contains:
+- **Generator:** a pure function in `src/domain/` takes one recipe change plus the data it references and returns one complete server script containing a single `ServerEvents.recipes(event => { ... })` block. It contains:
   - `event.remove({ id: '<original recipe id>' })` when the change replaces an existing recipe;
   - then the new recipe, ending in `.id('<pack-id>:<slug>')`;
   - recipe types without a KubeJS shorthand (modded types) as `event.custom({...})` with the recipe JSON.

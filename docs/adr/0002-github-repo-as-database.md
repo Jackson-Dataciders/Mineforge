@@ -13,7 +13,7 @@ Data must sync across three devices for one user. The data is small, document-sh
 - At runtime, server code reads and writes these files through the GitHub REST API. Only the storage layer (`src/storage/`) does this.
 - Every write sends the file SHA the client last read. If the SHA no longer matches, the write fails with a conflict. The UI then reloads the current version instead of overwriting it.
 - A change that touches several files is one atomic commit via the Git Data API (blobs → tree → commit → update ref). The ref update is not forced, so a concurrent commit causes a conflict, not a lost update.
-- Commits that touch only `data/`, `assets/` or `jars/` skip the Vercel build, via `ignoreCommand` in `vercel.json`.
+- Commits that touch only `data/`, `assets/` or `jars/` skip the Vercel build, via `ignoreCommand` in `vercel.json`. It diffs from the last successful deployment (`VERCEL_GIT_PREVIOUS_SHA`), so a code commit followed by a data commit is still deployed; without that SHA it builds.
 
 ## Consequences
 

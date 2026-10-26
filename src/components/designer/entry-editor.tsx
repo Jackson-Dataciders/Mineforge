@@ -38,6 +38,7 @@ import { catalogs } from "@/i18n/locale";
 import type { Messages } from "@/i18n/types";
 import { fetchJson } from "@/lib/fetch-json";
 import { DesignerProvider, type EntrySummary } from "./designer-context";
+import { StatusIcon } from "./status-icon";
 import { EntryRecipes } from "./entry-recipes";
 import {
   BlockFields,
@@ -103,7 +104,7 @@ export function EntryEditor({
   const [draft, setDraft] = useState<Entry>(() =>
     mode.kind === "edit"
       ? mode.entry
-      : defaultEntry(mode.type, `${modId}:new_entry`, "New entry"),
+      : defaultEntry(mode.type, `${modId}:new_entry`, "new_entry"),
   );
   const [path, setPath] = useState(() =>
     mode.kind === "edit" ? mode.entry.id.slice(modId.length + 1) : "",
@@ -189,8 +190,15 @@ export function EntryEditor({
     else setConfirmState({ message, apply });
   };
   const onChange = (next: Entry) => setDraft(next);
+  // Patches (e.g. recipes) refer to the current ID; store them against the
+  // draft's own ID, so a later rename still remaps custom recipe outputs.
   const patch = (fieldsPatch: Partial<Entry>) =>
-    setDraft((d) => ({ ...d, ...fieldsPatch }) as Entry);
+    setDraft((d) =>
+      withEntryId(
+        { ...withEntryId(d, entryId), ...fieldsPatch } as Entry,
+        d.id,
+      ),
+    );
 
   const storedIconUrl =
     mode.kind === "edit" && mode.entry.icon
@@ -541,7 +549,10 @@ export function EntryEditor({
                 <ul className="mt-1 list-disc pl-6 text-sm">
                   {referencedBy.map((e) => (
                     <li key={e.id}>
-                      {e.name}{" "}
+                      <span className="inline-flex items-center gap-1 align-middle">
+                        <StatusIcon status={e.status} />
+                        {e.name}
+                      </span>{" "}
                       <span className="font-mono text-xs text-muted">
                         {e.id}
                       </span>

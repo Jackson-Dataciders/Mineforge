@@ -13,7 +13,7 @@ Custom mod entries come in several types (item, block, entity, structure, mechan
 - TypeScript types are inferred from the schemas (`z.infer`), never written separately.
 - Forms derive their visible fields from the schema for the current `type` and `kind`.
 - The storage layer validates every entry against the schema on read and before write. Invalid data is rejected, not saved.
-- Schemas live in `src/domain/` (planned) and are the source of truth for the entry file format.
+- Schemas live in `src/domain/` and are the source of truth for the entry file format.
 
 ## Consequences
 

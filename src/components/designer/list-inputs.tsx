@@ -17,11 +17,7 @@ function Chip({ text, onRemove }: { text: string; onRemove: () => void }) {
   return (
     <li className="flex items-center gap-1 rounded-full border border-border bg-bg py-0.5 pr-0.5 pl-3 text-sm">
       <span className="break-all">{text}</span>
-      <IconButton
-        label={t("lists.remove", { name: text })}
-        onClick={onRemove}
-        className="size-8"
-      >
+      <IconButton label={t("lists.remove", { name: text })} onClick={onRemove}>
         <X className="size-4" aria-hidden />
       </IconButton>
     </li>
@@ -105,6 +101,12 @@ export function ChipInput({
   );
 }
 
+/** The status icon of an item that is an entry of this mod. */
+function EntryStatus({ id }: { id: string }) {
+  const status = useDesigner().lookup(id)?.status;
+  return status ? <StatusIcon status={status} /> : null;
+}
+
 /** Item IDs picked with the item search (key blocks). */
 export function ItemIdList({
   label,
@@ -126,6 +128,7 @@ export function ItemIdList({
           {values.map((id) => (
             <li key={id} className="flex items-center gap-2">
               <ItemIcon icon={lookup(id)?.icon} size={24} />
+              <EntryStatus id={id} />
               <span className="min-w-0 flex-1 text-sm">
                 {lookup(id)?.name ?? id}{" "}
                 <span className="font-mono text-xs text-muted">{id}</span>
@@ -188,6 +191,7 @@ export function ItemStackList({
         >
           <div className="flex min-h-11 min-w-0 flex-1 basis-40 items-center gap-2">
             <ItemIcon icon={lookup(stack.item)?.icon} size={24} />
+            <EntryStatus id={stack.item} />
             <span className="text-sm break-all">
               {lookup(stack.item)?.name ?? stack.item}
             </span>

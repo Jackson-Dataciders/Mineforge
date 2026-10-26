@@ -28,13 +28,13 @@ Each custom mod has a mind map that shows its entries and how they connect, from
    - one per outside item (vanilla, library or missing) used as a recipe ingredient. Outside items show only with the "Outside items" filter on (off by default) and while they have a visible edge.
 2. **Edges.** Edges to entries that no longer exist are dropped.
 
-   | Kind                                                                             | Direction                             | From                                                                                                   | Look                                |
-   | -------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------- |
-   | `ingredient_of`                                                                  | ingredient → entry                    | item/block recipes (every item alternative, no tags; raw JSON recipes give none); custom recipe inputs | muted, unlabeled                    |
-   | `drops_from`, `part_of_multiblock`, `generated_in_structure`, `powers`, `custom` | source → target                       | manual relations                                                                                       | accent, labeled (custom: its label) |
-   | `part_of_multiblock` (derived)                                                   | cell or controller entry → multiblock | multiblock layers and controller                                                                       | secondary, dashed, labeled          |
-   | `made_in`                                                                        | product → machine                     | custom recipes and their type's machine                                                                | secondary, dashed, labeled          |
-   | `involved_in`                                                                    | entry → mechanic                      | mechanic involved entries                                                                              | secondary, dashed, labeled          |
+   | Kind                                                                             | Direction                             | From                                                                                                   | Look                                                                             |
+   | -------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+   | `ingredient_of`                                                                  | ingredient → entry                    | item/block recipes (every item alternative, no tags; raw JSON recipes give none); custom recipe inputs | muted, unlabeled                                                                 |
+   | `drops_from`, `part_of_multiblock`, `generated_in_structure`, `powers`, `custom` | source → target                       | manual relations                                                                                       | accent, labeled (custom: its label); each type has its own dash pattern or width |
+   | `part_of_multiblock` (derived)                                                   | cell or controller entry → multiblock | multiblock layers and controller                                                                       | secondary, dashed, labeled                                                       |
+   | `made_in`                                                                        | product → machine                     | custom recipes and their type's machine                                                                | secondary, dashed, labeled                                                       |
+   | `involved_in`                                                                    | entry → mechanic                      | mechanic involved entries                                                                              | secondary, dashed, labeled                                                       |
 
 3. **Merging:** the edge ID is `<kind>:[<label>:]<source>-><target>`, so duplicates merge. A manual relation wins over the same derived link.
 
@@ -42,7 +42,8 @@ Each custom mod has a mind map that shows its entries and how they connect, from
 
 4. **Entry node** (208×64):
    - shows the entry icon (or a placeholder), the name, the `StatusIcon` and the type;
-   - has an "Open" link button (44 px) to the entry form.
+   - has an "Open" link button (44 px) to the entry form; tapping or clicking the node also opens it.
+   - **Touch screens** (coarse pointer): nodes can't be dragged by accident while panning; a **Move nodes** toggle in the controls turns dragging on.
 
    **Outside item node** (176×48): icon, name and mod name. A danger border marks an item that is missing from the designer's item set.
 
@@ -51,11 +52,11 @@ Each custom mod has a mind map that shows its entries and how they connect, from
 5. **File format:** `{ positions: { "<node id>": { x, y } } }`, integers, at most 2000 positions. A missing file means no positions.
 6. **Opening the map:**
    - If no visible node has a stored position, ELK (`layered`, left to right) lays out the visible graph in the browser. Nothing is saved until you drag or re-layout.
-   - Nodes without a stored position go into a column right of the stored layout.
+   - Nodes without a stored position (e.g. new entries, or outside items when their filter is turned on) are laid out with ELK among themselves and placed right of the stored layout (`placeBeside`). The column placement (`placeUnpositioned`) is only the fallback if ELK fails.
 7. **Saving after a drag:** about 800 ms after a drag, all shown positions are saved (`PUT /api/custom-mods/[modId]/layout` with the `layout.json` SHA).
    - Only one save runs at a time; moves made during a save are sent next.
    - A conflict reloads the map.
-   - A save still waiting for its timer is sent at once (`keepalive`) when the page is left or hidden.
+   - A save still waiting for its timer is sent at once when the page is hidden (through the queue) or left (`keepalive`, or a normal request for bodies over 60 KB).
    - The server rounds coordinates and drops IDs that are no longer nodes.
 8. **Re-layout:** asks for confirmation, then lays out the visible graph with ELK and saves. Hidden nodes keep their positions.
 

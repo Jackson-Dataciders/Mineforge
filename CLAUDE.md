@@ -7,7 +7,7 @@ Private, single-user web app for planning Minecraft 1.21.1 NeoForge mods and mod
 - The private GitHub repo is the database. Next.js on Vercel reads and writes it through the GitHub API.
 - UI in English and German.
 
-**Current state:** phases 1 (foundation), 2 (jar extraction, `tools/extract-jar.ts`), 3 (Modpack Planner: library, upload, recipe changes, KubeJS export, pack tasks), 4 (Mod Designer entries: types, recipes, custom recipe types, pixel editor), 5 (designer phase, generated and manual tasks, taskboard, status icons) and 6 (mind map with derived edges, ELK layout and saved positions) are done. Anything marked "planned" in `docs/architecture.md` does not exist yet.
+**Current state:** phases 1 (foundation), 2 (jar extraction, `tools/extract-jar.ts`), 3 (Modpack Planner: library, upload, recipe changes, KubeJS export, pack tasks), 4 (Mod Designer entries: types, recipes, custom recipe types, pixel editor), 5 (designer phase, generated and manual tasks, taskboard, status icons), 6 (mind map with derived edges, ELK layout and saved positions) and 7 (phone pass, setup README, final review in `docs/final-review.md`) are done. Anything marked "planned" in `docs/architecture.md` does not exist yet.
 
 ## Commands
 
@@ -29,9 +29,9 @@ A PostToolUse hook runs Prettier on every file Claude edits (`.claude/hooks/form
 ## Hard rules
 
 1. **The repo stays private.** It holds third-party jars and textures that may not be redistributed (ADR 0003).
-2. **Every page and route requires the allowlisted login.** This means `src/proxy.ts`, plus `requireUser()` in the `(app)` layout and every page, and `apiRoute()` around every route handler (ADR 0013). The app serves private, licensed data on a public URL (ADR 0004).
+2. **Every page and route requires the allowlisted login.** This means `src/proxy.ts`, plus `requireUser()` in the `(app)` layout and every page, and `apiRoute()` around every route handler (ADR 0013). The only exceptions are `/sign-in` and the Auth.js handler `src/app/api/auth/[...nextauth]/route.ts`, which must stay public. The app serves private, licensed data on a public URL (ADR 0004).
 3. **No textures or icons in `public/`.** Next.js serves `public/` without auth; images go through the authenticated texture route (ADR 0004).
-4. **All data access goes through `src/storage/`.** Never call GitHub from components or routes directly; SHA checks and atomic commits live in one place (ADR 0002). ESLint enforces this.
+4. **All data access goes through `src/storage/`.** Never call GitHub from components or routes directly; SHA checks and atomic commits live in one place (ADR 0002). ESLint enforces this. The one exception is the jar upload, where the browser sends blobs straight to GitHub with a short-lived token (`jar-upload.tsx`, ADR 0005); the commit still goes through storage.
 5. **Code is English:** identifiers, file names, comments, docs and commit messages. That keeps one vocabulary (see `docs/glossary.md`).
 6. **Minecraft names are always English** (`minecraft:iron_ingot`, "Iron Ingot"), also in the German UI. They must match the game and the lang files.
 7. **UI strings only through i18n** (`src/i18n/`, en + de), never hard-coded in components. Both languages must stay switchable.

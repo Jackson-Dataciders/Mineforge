@@ -11,7 +11,8 @@ import {
   type Edge,
   type NodeChange,
 } from "@xyflow/react";
-import { LayoutGrid, Maximize, ZoomIn, ZoomOut } from "lucide-react";
+import { LayoutGrid, Maximize, Move, ZoomIn, ZoomOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -30,6 +31,7 @@ import {
   DEFAULT_MAP_FILTERS,
   filterMindMap,
   NODE_SIZE,
+  placeBeside,
   placeUnpositioned,
   type Layout,
   type MindMap as MindMapGraph,
@@ -66,6 +68,13 @@ type VersionedLayout = { data: Layout; sha: string | null };
 type FlowNode = EntryFlowNode | ItemFlowNode;
 
 const SAVE_DELAY_MS = 800;
+const COARSE = "(pointer: coarse)";
+
+function subscribeCoarsePointer(listener: () => void) {
+  const query = window.matchMedia(COARSE);
+  query.addEventListener("change", listener);
+  return () => query.removeEventListener("change", listener);
+}
 /** Fit the map, but never zoom small graphs beyond 100 %. */
 const FIT_VIEW = { padding: 0.1, maxZoom: 1 };
 
@@ -137,37 +146,58 @@ function MindMapCanvas({
   const [positions, setPositions] = useState<Positions>(
     initialLayout.data.positions,
   );
-  /** ELK positions for a map without any stored position (not saved). */
+  /** ELK positions of nodes without a stored position (not saved). */
   const [computed, setComputed] = useState<Positions | null>(null);
   const [relayoutOpen, setRelayoutOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const needsLayout =
-    visible.nodes.length > 0 &&
-    visible.nodes.every((n) => !positions[n.id]) &&
-    !visible.nodes.every((n) => computed?.[n.id]);
-  const visibleKey = visible.nodes.map((n) => n.id).join("|");
+  // Nodes with neither a stored nor a computed position need ELK.
+  const missing = visible.nodes.filter(
+    (n) => !positions[n.id] && !computed?.[n.id],
+  );
+  const needsLayout = missing.length > 0;
+  const missingKey = missing.map((n) => n.id).join("|");
 
   useEffect(() => {
     if (!needsLayout) return;
     let active = true;
-    layoutWithElk(visible)
+    const noneStored = visible.nodes.every((n) => !positions[n.id]);
+    // Nothing stored: lay out the whole visible map. Otherwise lay out only
+    // the new nodes and put them beside the existing layout.
+    const ids = new Set(missing.map((n) => n.id));
+    const graph = noneStored
+      ? visible
+      : {
+          nodes: missing,
+          edges: visible.edges.filter(
+            (e) => ids.has(e.source) && ids.has(e.target),
+          ),
+        };
+    layoutWithElk(graph)
       .catch(() => {
         // ELK failed: fall back to the simple column placement.
         if (active) fail("unknown");
-        return placeUnpositioned(visible.nodes, {});
+        return placeUnpositioned(graph.nodes, {});
       })
       .then((result) => {
         if (!active) return;
-        setComputed(result);
-        requestAnimationFrame(() => void flow.fitView(FIT_VIEW));
+        setComputed((c) => {
+          const placed = noneStored ? {} : { ...(c ?? {}), ...positions };
+          return {
+            ...(c ?? {}),
+            ...placeBeside(visible.nodes, placed, result),
+          };
+        });
+        if (noneStored) {
+          requestAnimationFrame(() => void flow.fitView(FIT_VIEW));
+        }
       });
     return () => {
       active = false;
     };
-    // `visibleKey` stands for `visible`'s nodes.
+    // `missingKey` stands for the nodes to lay out.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needsLayout, visibleKey, flow, fail]);
+  }, [needsLayout, missingKey, flow, fail]);
 
   const shown = useMemo(
     () =>
@@ -231,7 +261,11 @@ function MindMapCanvas({
             e.kind === "ingredient_of"
               ? undefined
               : (e.label ?? edgeKindLabel(e.kind, t)),
-          style: { stroke: look.stroke, strokeDasharray: look.dash },
+          style: {
+            stroke: look.stroke,
+            strokeDasharray: look.dash,
+            strokeWidth: look.width,
+          },
           markerEnd: { type: MarkerType.ArrowClosed, color: look.stroke },
           labelStyle: { fill: "var(--text)", fontSize: 12 },
           labelBgStyle: { fill: "var(--surface)" },
@@ -296,23 +330,36 @@ function MindMapCanvas({
 
   // A move still waiting for its timer is sent when the page goes away.
   useEffect(() => {
+    // Leaving: the page may be gone before a normal request finishes.
     const sendPending = () => {
       if (!timerRef.current) return;
       clearTimeout(timerRef.current);
       timerRef.current = null;
+      const body = JSON.stringify({
+        positions: latestRef.current,
+        sha: shaRef.current,
+      });
+      // Browsers cap keepalive bodies at 64 KB; larger maps try a normal send.
       void fetch(url, {
         method: "PUT",
-        keepalive: true,
+        keepalive: body.length < 60_000,
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          positions: latestRef.current,
-          sha: shaRef.current,
-        }),
-      });
+        body,
+      }).catch(() => undefined);
+    };
+    // Hidden (e.g. switching apps on a phone): the page lives on, so save
+    // through the queue, which keeps the SHA up to date.
+    const onHide = () => {
+      if (document.visibilityState !== "hidden" || !timerRef.current) return;
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+      void queueRef.current?.save(latestRef.current);
     };
     window.addEventListener("pagehide", sendPending);
+    document.addEventListener("visibilitychange", onHide);
     return () => {
       window.removeEventListener("pagehide", sendPending);
+      document.removeEventListener("visibilitychange", onHide);
       sendPending();
     };
   }, [url]);
@@ -362,6 +409,16 @@ function MindMapCanvas({
     }
   }
 
+  // On touch screens a drag would move nodes while panning; dragging is
+  // turned on there with "Move nodes", and a tap opens the entry.
+  const coarse = useSyncExternalStore(
+    subscribeCoarsePointer,
+    () => window.matchMedia(COARSE).matches,
+    () => false,
+  );
+  const [arranging, setArranging] = useState(false);
+  const router = useRouter();
+
   const laidOut = !needsLayout;
   const a11y = {
     "node.a11yDescription.default": t("mindMap.a11y.node"),
@@ -398,6 +455,10 @@ function MindMapCanvas({
             nodeTypes={NODE_TYPES}
             onNodesChange={onNodesChange}
             onNodeDragStop={onNodeDragStop}
+            onNodeClick={(_event, node) => {
+              if (node.type === "entry") router.push(node.data.href);
+            }}
+            nodesDraggable={!coarse || arranging}
             nodesConnectable={false}
             elementsSelectable={false}
             ariaLabelConfig={a11y}
@@ -414,7 +475,7 @@ function MindMapCanvas({
               </Panel>
             )}
             <Panel position="top-right">
-              <div className="flex gap-1 rounded-lg border border-border bg-surface p-1">
+              <div className="flex max-w-[calc(100vw-3rem)] flex-wrap justify-end gap-1 rounded-lg border border-border bg-surface p-1">
                 <IconButton
                   label={t("mindMap.zoomIn")}
                   onClick={() => void flow.zoomIn()}
@@ -433,6 +494,16 @@ function MindMapCanvas({
                 >
                   <Maximize className="size-4" aria-hidden />
                 </IconButton>
+                {coarse && (
+                  <Button
+                    aria-pressed={arranging}
+                    onClick={() => setArranging((a) => !a)}
+                    variant={arranging ? "primary" : "secondary"}
+                  >
+                    <Move className="size-4" aria-hidden />
+                    {t("mindMap.arrange")}
+                  </Button>
+                )}
                 <Button onClick={() => setRelayoutOpen(true)} disabled={busy}>
                   <LayoutGrid className="size-4" aria-hidden />
                   {t("mindMap.relayout")}

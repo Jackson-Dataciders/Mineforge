@@ -25,7 +25,7 @@ The change is what the caller names (a commit range, a branch or "the working tr
 3. Check every changed file against:
    - **Hard rules in CLAUDE.md:**
      - private repo, nothing published
-     - every page and route behind the allowlisted login, with `requireUser()` in route handlers
+     - every page and route behind the allowlisted login: `requireUser()` in pages, `apiRoute()` around route handlers (exceptions: `/sign-in` and the Auth.js handler)
      - no textures or icons in `public/`
      - data access only through `src/storage/`, no GitHub calls elsewhere
      - English code

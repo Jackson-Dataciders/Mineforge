@@ -10,6 +10,8 @@ const ERROR_KEYS: Record<string, MessageKey> = {
   conflict: "errors.conflict",
   idTaken: "errors.idTaken",
   idTakenByLibrary: "errors.idTakenByLibrary",
+  idReserved: "errors.idReserved",
+  unauthorized: "errors.unauthorized",
   invalidId: "errors.invalidId",
   invalidInput: "errors.invalidInput",
   notFound: "errors.notFound",
@@ -31,9 +33,10 @@ export const apiErrorKey = (code: string): MessageKey =>
   ERROR_KEYS[code] ?? "errors.unknown";
 
 /**
- * Standard handling of a failed API call: a toast with the error, and on a
- * conflict, not-found, stale-mod or stale-task error a reload, so the user retries on
- * fresh data instead of overwriting (ADR 0002).
+ * Standard handling of a failed API call: a toast with the error, sign-in
+ * after an expired session (401), and on a conflict, not-found, stale-mod or
+ * stale-task error a reload, so the user retries on fresh data instead of
+ * overwriting (ADR 0002).
  */
 export function useApiFailure() {
   const router = useRouter();
@@ -42,6 +45,11 @@ export function useApiFailure() {
   return useCallback(
     (error: string) => {
       toast(t(apiErrorKey(error)), error === "conflict" ? "info" : "error");
+      // The session ended: go to sign-in rather than retrying.
+      if (error === "unauthorized") {
+        router.push("/sign-in");
+        return;
+      }
       if (
         ["conflict", "notFound", "unknownMod", "taskNotMovable"].includes(error)
       ) {

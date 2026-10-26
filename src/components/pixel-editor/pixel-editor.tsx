@@ -31,7 +31,7 @@ import {
   redo,
   rgbaHex,
   rgbHex,
-  setPixel,
+  drawLine,
   startHistory,
   TRANSPARENT,
   undo,
@@ -99,6 +99,7 @@ export function PixelEditor({
   // re-renders (fast taps and drags) see the latest values.
   const historyRef = useRef(history);
   const strokeRef = useRef<PixelImage | null>(null);
+  const lastCell = useRef<{ x: number; y: number } | null>(null);
   const setHistory = (update: (h: History) => History) => {
     historyRef.current = update(historyRef.current);
     setHistoryState(historyRef.current);
@@ -156,9 +157,13 @@ export function PixelEditor({
     };
   };
 
+  /** Paints the cell under the pointer, joined to the stroke's last cell. */
   function paint(event: ReactPointerEvent, base: PixelImage): PixelImage {
     const { x, y } = cellAt(event);
-    return setPixel(base, x, y, tool === "eraser" ? TRANSPARENT : color);
+    const from = lastCell.current ?? { x, y };
+    lastCell.current = { x, y };
+    const paintColor = tool === "eraser" ? TRANSPARENT : color;
+    return drawLine(base, from.x, from.y, x, y, paintColor);
   }
 
   function onPointerDown(event: ReactPointerEvent<HTMLCanvasElement>) {
@@ -199,6 +204,7 @@ export function PixelEditor({
       remember(color);
       return;
     }
+    lastCell.current = null;
     setStroke(paint(event, historyRef.current.present));
   }
 
@@ -233,6 +239,7 @@ export function PixelEditor({
     pointers.current.delete(event.pointerId);
     if (pointers.current.size < 2) pinch.current = null;
     const finished = strokeRef.current;
+    lastCell.current = null;
     if (finished) {
       setHistory((h) => commit(h, finished));
       if (tool === "pencil") remember(color);

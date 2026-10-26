@@ -76,7 +76,7 @@ Each custom mod has a current phase and a taskboard. Tasks generated from the en
 13. `StatusIcon`:
     - **Icons:** backlog = muted circle, planned = secondary dotted circle, implemented = ok check circle. The accessible name is the status.
     - **Contrast:** the icon sits on a surface base, so it keeps its contrast on hovered rows (ADR 0011). Inside its own tint it has no base.
-    - **Where it shows:** the mod page entry list (inside the status pill), the involved-entries checkbox list, entry rows in the item search modal, and tasks on the taskboard.
+    - **Where it shows:** the mod page entry list (inside the status pill), the involved-entries checkbox list, entry rows in the item search modal, tasks on the taskboard, item lists (key blocks, drops, loot), recipe and multiblock slots holding an entry, the entry delete dialog's reference list and the recipe type delete dialog's user list. Native selects (relation target, task entry) can't show icons.
 
 ## Acceptance criteria
 

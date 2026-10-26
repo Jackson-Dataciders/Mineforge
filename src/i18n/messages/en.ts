@@ -62,6 +62,9 @@ export const en = {
       "This was changed elsewhere. The latest version has been loaded; please try again.",
     idTaken: "This ID is already used.",
     idTakenByLibrary: "This ID is already used by a library mod.",
+    idReserved:
+      "This ID belongs to Minecraft, a mod loader or KubeJS. Please choose another.",
+    unauthorized: "Your session has ended. Please sign in again.",
     invalidId: "This ID is not valid.",
     invalidInput: "Please check the highlighted fields.",
     notFound: "Not found. It may have been deleted elsewhere.",
@@ -390,6 +393,7 @@ export const en = {
     zoomOut: "Zoom out",
     fit: "Fit to view",
     relayout: "Re-layout",
+    arrange: "Move nodes",
     relayoutTitle: "Re-layout the mind map",
     relayoutConfirm:
       "This replaces the positions of all visible nodes. Hidden nodes keep theirs.",
@@ -400,7 +404,7 @@ export const en = {
     edgeList: "Edges shown on the mind map",
     edgeItem: "{source} – {kind} → {target}",
     a11y: {
-      node: "Drag to move this node. Use its open button to edit the entry.",
+      node: "Use the open button or a tap to edit the entry. Drag to move the node; on touch screens, turn on Move nodes first.",
       moved: "Moved to x {x}, y {y}",
       edge: "Edges are read-only.",
     },

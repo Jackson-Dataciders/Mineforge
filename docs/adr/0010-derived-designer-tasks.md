@@ -9,7 +9,7 @@ The Mod Designer taskboard should reflect what is actually missing in a custom m
 
 ## Decision
 
-- Generated tasks are computed by pure rules in `src/domain/` (planned) from a custom mod's entries and its current phase. They are not stored.
+- Generated tasks are computed by pure rules in `src/domain/` from a custom mod's entries and its current phase. They are not stored.
 - Each generated task has a stable key `<rule-id>:<entry-id>`. The key stays the same across recomputation, so UI state and completion can refer to it.
 - Only rules for the custom mod's **current phase** (planning / implementation / optimization) produce tasks.
 - Completing a generated task advances the entry's status: backlog → planned in the planning phase, planned → implemented in the implementation phase. A task whose condition no longer holds disappears.

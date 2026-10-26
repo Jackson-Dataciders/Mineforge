@@ -43,6 +43,11 @@ describe("custom mods", () => {
     await expect(
       createCustomMod(storage, { modId: "Bad Id", name: "X" }),
     ).rejects.toEqual(new ValidationError("invalidId"));
+    for (const modId of ["minecraft", "neoforge", "kubejs"]) {
+      await expect(
+        createCustomMod(storage, { modId, name: "X" }),
+      ).rejects.toEqual(new ValidationError("idReserved"));
+    }
   });
 
   it("lists sorted by name and renames with SHA check", async () => {

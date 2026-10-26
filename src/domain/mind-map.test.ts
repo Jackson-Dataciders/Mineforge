@@ -8,6 +8,7 @@ import {
   layoutSchema,
   mindMapNodeIds,
   NODE_SIZE,
+  placeBeside,
   placeUnpositioned,
   sanitizePositions,
   type MindMap,
@@ -279,6 +280,24 @@ describe("layout", () => {
     });
     expect(placeUnpositioned(nodes.slice(0, 1), {})).toEqual({
       "demo:frame": { x: 0, y: 0 },
+    });
+  });
+
+  it("moves laid-out new nodes beside the placed ones", () => {
+    const nodes = map.nodes.slice(0, 3);
+    const moved = placeBeside(
+      nodes,
+      { "demo:frame": { x: 10, y: 40 } },
+      { "demo:gear": { x: 12, y: 12 }, "demo:heat": { x: 12, y: 100 } },
+    );
+    const x = 10 + NODE_SIZE.entry.width + 80;
+    expect(moved).toEqual({
+      "demo:gear": { x, y: 40 },
+      "demo:heat": { x, y: 128 },
+    });
+    // Nothing placed yet: the layout stays as it is.
+    expect(placeBeside(nodes, {}, { "demo:gear": { x: 5, y: 6 } })).toEqual({
+      "demo:gear": { x: 5, y: 6 },
     });
   });
 });

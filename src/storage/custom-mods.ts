@@ -8,7 +8,7 @@ import {
   type CustomRecipeType,
 } from "@/domain/custom-recipe";
 import { splitEntryId } from "@/domain/entry-id";
-import { isModId } from "@/domain/ids";
+import { isModId, RESERVED_MOD_IDS } from "@/domain/ids";
 import { modpackSchema } from "@/domain/modpack";
 import { encodeDocument, readDocument, type Versioned } from "./documents";
 import { summarizeEntry } from "@/domain/entry";
@@ -51,6 +51,9 @@ export async function createCustomMod(
   input: { modId: string; name: string },
 ): Promise<Versioned<CustomMod>> {
   if (!isModId(input.modId)) throw new ValidationError("invalidId");
+  if (RESERVED_MOD_IDS.has(input.modId)) {
+    throw new ValidationError("idReserved");
+  }
   const libraryIds = (await storage.listDir(paths.libraryDir)).map(
     (e) => e.name,
   );

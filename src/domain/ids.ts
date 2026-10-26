@@ -5,6 +5,20 @@ export const MOD_ID_PATTERN = /^[a-z][a-z0-9_]{1,63}$/;
 export const PACK_ID_PATTERN = /^(?=.{1,64}$)[a-z0-9]+(-[a-z0-9]+)*$/;
 
 export const isModId = (value: string) => MOD_ID_PATTERN.test(value);
+
+/**
+ * Namespaces of the game, the loaders and KubeJS. A custom mod with one of
+ * these IDs would collide with their items and recipe IDs.
+ */
+export const RESERVED_MOD_IDS: ReadonlySet<string> = new Set([
+  "minecraft",
+  "neoforge",
+  "forge",
+  "fabric",
+  "fabricloader",
+  "kubejs",
+  "java",
+]);
 export const isPackId = (value: string) => PACK_ID_PATTERN.test(value);
 
 function asciiWords(name: string): string[] {

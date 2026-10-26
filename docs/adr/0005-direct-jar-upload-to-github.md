@@ -17,7 +17,7 @@ Vercel limits function request bodies to about 4.5 MB. Mod jars are often larger
 ## Consequences
 
 - No large bodies pass through Vercel; no extra storage service.
-- The token is visible in the browser for up to one hour (installation tokens cannot be shorter). It can write repo contents, so it is issued only to the allowlisted user and only on demand.
+- The token is visible in the browser for up to one hour (installation tokens cannot be shorter). It can write repo contents, so it is issued only to the allowlisted user and only on demand. Contents write covers the whole repository, code included: a leaked token could push code that Vercel then deploys, until it expires.
 - Blob upload is base64 JSON, so a 100 MB jar is about 134 MB on the wire; the UI must show progress.
 
 ## Alternatives considered

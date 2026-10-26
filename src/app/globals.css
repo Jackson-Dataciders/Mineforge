@@ -29,6 +29,14 @@
     background: var(--bg);
     color: var(--text);
     font-family: system-ui, sans-serif;
+    /* Long IDs and names wrap instead of widening the page on phones. */
+    overflow-wrap: anywhere;
+  }
+
+  /* Placeholders use the tested muted token, not a faded text color. */
+  ::placeholder {
+    color: var(--muted);
+    opacity: 1;
   }
 
   :focus-visible {

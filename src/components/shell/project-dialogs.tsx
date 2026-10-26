@@ -20,6 +20,7 @@ const ERROR_KEYS: Record<string, MessageKey> = {
   conflict: "errors.conflict",
   idTaken: "errors.idTaken",
   idTakenByLibrary: "errors.idTakenByLibrary",
+  idReserved: "errors.idReserved",
   invalidId: "errors.invalidId",
   invalidInput: "errors.invalidInput",
   notFound: "errors.notFound",
@@ -84,7 +85,9 @@ export function CreateProjectDialog({
       router.push(`${config.basePath}/${effectiveId}`);
       router.refresh();
     } else if (
-      ["idTaken", "idTakenByLibrary", "invalidId"].includes(result.error)
+      ["idTaken", "idTakenByLibrary", "idReserved", "invalidId"].includes(
+        result.error,
+      )
     ) {
       setIdError(t(errorKey(result.error)));
     } else {

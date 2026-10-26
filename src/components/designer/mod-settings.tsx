@@ -26,6 +26,7 @@ import { suggestEntryPath } from "@/domain/entry-id";
 import { useT } from "@/i18n/client";
 import { fetchJson } from "@/lib/fetch-json";
 import type { EntrySummary } from "./designer-context";
+import { StatusIcon } from "./status-icon";
 
 export type LibraryOption = {
   id: string;
@@ -457,7 +458,12 @@ export function RecipeTypesSection({
                 </p>
                 <ul className="mt-1 list-disc pl-6 text-sm">
                   {usersByType[deleting.id]!.map((e) => (
-                    <li key={e.id}>{e.name}</li>
+                    <li key={e.id}>
+                      <span className="inline-flex items-center gap-1 align-middle">
+                        <StatusIcon status={e.status} />
+                        {e.name}
+                      </span>
+                    </li>
                   ))}
                 </ul>
               </div>

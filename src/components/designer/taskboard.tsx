@@ -353,7 +353,7 @@ function BoardTaskView({
           (boardTask.entry ? (
             <Link
               href={`/designer/${modId}/entries/${splitEntryId(boardTask.entry.id).path}`}
-              className="inline-flex min-h-6 items-center gap-1 text-text underline-offset-2 hover:underline"
+              className="inline-flex min-h-11 items-center gap-1 text-text underline-offset-2 hover:underline"
             >
               <StatusIcon status={boardTask.entry.status} />
               {boardTask.entry.name}

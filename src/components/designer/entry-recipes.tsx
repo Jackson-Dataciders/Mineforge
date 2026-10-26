@@ -210,7 +210,7 @@ export function EntryRecipes({
         </div>
       ) : (
         <div className="flex flex-wrap items-end gap-2">
-          <div className="flex flex-col gap-1">
+          <div className="flex max-w-full min-w-0 flex-col gap-1">
             <label htmlFor={selectId} className="text-sm font-medium">
               {t("designer.recipes.type")}
             </label>
@@ -218,7 +218,7 @@ export function EntryRecipes({
               id={selectId}
               value={newType}
               onChange={(e) => setNewType(e.target.value)}
-              className="min-h-11 rounded-md border border-border bg-bg px-2 text-base text-text"
+              className="min-h-11 w-full rounded-md border border-border bg-bg px-2 text-base text-text"
             >
               {[...VISUAL_RECIPE_TYPES, JSON_RECIPE].map((type) => (
                 <option key={type} value={type}>

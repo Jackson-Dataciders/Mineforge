@@ -63,6 +63,9 @@ export const de: Messages = {
     idTaken: "Diese ID wird bereits verwendet.",
     idTakenByLibrary:
       "Diese ID wird bereits von einer Bibliotheks-Mod verwendet.",
+    idReserved:
+      "Diese ID gehört zu Minecraft, einem Mod-Loader oder KubeJS. Bitte wähle eine andere.",
+    unauthorized: "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
     invalidId: "Diese ID ist ungültig.",
     invalidInput: "Bitte prüfe die markierten Felder.",
     notFound:
@@ -400,6 +403,7 @@ export const de: Messages = {
     zoomOut: "Verkleinern",
     fit: "Alles anzeigen",
     relayout: "Neu anordnen",
+    arrange: "Knoten verschieben",
     relayoutTitle: "Mindmap neu anordnen",
     relayoutConfirm:
       "Das ersetzt die Positionen aller sichtbaren Knoten. Ausgeblendete Knoten behalten ihre.",
@@ -410,7 +414,7 @@ export const de: Messages = {
     edgeList: "Kanten in der Mindmap",
     edgeItem: "{source} – {kind} → {target}",
     a11y: {
-      node: "Ziehen verschiebt den Knoten. Mit dem Öffnen-Knopf bearbeitest du den Eintrag.",
+      node: "Mit dem Öffnen-Knopf oder Antippen bearbeitest du den Eintrag. Ziehen verschiebt den Knoten; auf Touchscreens zuerst „Knoten verschieben“ einschalten.",
       moved: "Verschoben nach x {x}, y {y}",
       edge: "Kanten sind schreibgeschützt.",
     },

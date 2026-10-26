@@ -29,7 +29,12 @@
 **Phase 6 (Mind map, spec `docs/specs/06-mind-map.md`):**
 
 - exists: the mind map page with derived nodes and edges (ADR 0023), outside item nodes behind a filter, ELK auto-layout, positions saved to `layout.json` after a drag, re-layout, filters.
-- planned: phone usability pass, README and final review (phase 7).
+- planned at the time: phone usability pass, README and final review (phase 7).
+
+**Phase 7 (Finish, spec `docs/specs/07-phone-pass-and-release.md`):**
+
+- exists: phone pass at 375 px (no code changes needed), setup README, final review in `docs/final-review.md`.
+- planned: nothing; all phases of the brief are built. Later features start with a new spec.
 
 ## System overview
 

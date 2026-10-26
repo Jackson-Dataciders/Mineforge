@@ -250,3 +250,32 @@ export function placeUnpositioned(
   }
   return result;
 }
+
+/**
+ * Moves positions laid out for new nodes (e.g. by ELK, starting anywhere)
+ * so their top-left corner sits right of the nodes already placed, at the
+ * placed nodes' top. With nothing placed, the positions are kept.
+ */
+export function placeBeside(
+  nodes: readonly MapNode[],
+  placed: Readonly<Positions>,
+  laidOut: Readonly<Positions>,
+): Positions {
+  let right = -Infinity;
+  let top = Infinity;
+  for (const node of nodes) {
+    const p = placed[node.id];
+    if (!p) continue;
+    right = Math.max(right, p.x + sizeOf(node).width);
+    top = Math.min(top, p.y);
+  }
+  const ids = Object.keys(laidOut);
+  if (!Number.isFinite(right) || ids.length === 0) return { ...laidOut };
+  const minX = Math.min(...ids.map((id) => laidOut[id]!.x));
+  const minY = Math.min(...ids.map((id) => laidOut[id]!.y));
+  const dx = right + 80 - minX;
+  const dy = top - minY;
+  return Object.fromEntries(
+    ids.map((id) => [id, { x: laidOut[id]!.x + dx, y: laidOut[id]!.y + dy }]),
+  );
+}

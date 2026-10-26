@@ -99,7 +99,7 @@ function Check({
       />
       {looks.map((look) => (
         <svg
-          key={look.stroke}
+          key={`${look.stroke}${look.dash ?? ""}`}
           width="28"
           height="8"
           aria-hidden
@@ -112,7 +112,7 @@ function Check({
             y2="4"
             style={{
               stroke: look.stroke,
-              strokeWidth: 2,
+              strokeWidth: look.width,
               strokeDasharray: look.dash,
             }}
           />

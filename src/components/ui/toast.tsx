@@ -47,7 +47,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             role={toast.tone === "error" ? "alert" : "status"}
-            className={`pointer-events-auto flex w-full max-w-md items-start gap-2 rounded-lg border bg-surface py-1 pr-1 pl-3 text-sm shadow-lg ${
+            className={`pointer-events-auto flex w-full max-w-md items-start gap-2 rounded-lg border bg-surface py-1 pr-1 pl-3 text-sm ${
               toast.tone === "error" ? "border-danger" : "border-border"
             }`}
           >

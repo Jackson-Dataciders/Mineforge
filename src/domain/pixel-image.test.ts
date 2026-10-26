@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  drawLine,
   commit,
   emptyImage,
   floodFill,
@@ -113,5 +114,32 @@ describe("isIconPng", () => {
     const notPng = png(16, 16);
     notPng[1] = 0;
     expect(isIconPng(notPng)).toBe(false);
+  });
+});
+
+describe("drawLine", () => {
+  const red: [number, number, number, number] = [255, 0, 0, 255];
+  const painted = (image: Uint8ClampedArray) => {
+    const cells: string[] = [];
+    for (let y = 0; y < 16; y++)
+      for (let x = 0; x < 16; x++)
+        if (image[(y * 16 + x) * 4 + 3]) cells.push(`${x},${y}`);
+    return cells;
+  };
+
+  it("joins two cells without gaps", () => {
+    const empty = new Uint8ClampedArray(16 * 16 * 4);
+    expect(painted(drawLine(empty, 0, 0, 3, 0, red))).toEqual([
+      "0,0",
+      "1,0",
+      "2,0",
+      "3,0",
+    ]);
+    expect(painted(drawLine(empty, 0, 0, 2, 2, red))).toEqual([
+      "0,0",
+      "1,1",
+      "2,2",
+    ]);
+    expect(painted(drawLine(empty, 3, 1, 3, 1, red))).toEqual(["3,1"]);
   });
 });

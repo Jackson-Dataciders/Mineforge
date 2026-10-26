@@ -1,5 +1,6 @@
 "use client";
 
+import { StatusIcon } from "@/components/designer/status-icon";
 import { ItemIcon } from "@/components/items/item-icon";
 import type { SearchItem } from "@/domain/item-search";
 import { ingredientValues, type Ingredient } from "@/domain/recipe";
@@ -53,6 +54,9 @@ export function IngredientSlot({
   const first = values[0];
   const description = describeIngredient(ingredient, lookup, t);
   const missing = values.some((v) => "item" in v && lookup(v.item)?.missing);
+  // Entries of a custom mod also show their status.
+  const status =
+    first && "item" in first ? lookup(first.item)?.status : undefined;
   const name = label ? `${label}: ${description}` : description;
   const content = (
     <>
@@ -65,6 +69,11 @@ export function IngredientSlot({
       {values.length > 1 && (
         <span className="absolute top-0 right-0.5 text-xs font-semibold text-text">
           +{values.length - 1}
+        </span>
+      )}
+      {status && (
+        <span className="absolute bottom-0 left-0">
+          <StatusIcon status={status} decorative />
         </span>
       )}
       {count !== undefined && count > 1 && (

@@ -35,7 +35,8 @@ The user decided:
   - The server rounds coordinates and drops IDs that are no longer nodes on every save.
 - **Layout:**
   - **First view:** with no stored position for any visible node, ELK (`layered`, left to right) lays out the visible graph in the browser. The result isn't saved until the user drags or re-layouts.
-  - **New nodes** are placed deterministically in a column right of the stored layout.
+  - **New nodes** (no stored position) are laid out with ELK among themselves and placed right of the stored layout; the column placement is only a fallback if ELK fails.
+  - **Touch screens:** node dragging is off by default (a "Move nodes" toggle turns it on), so panning doesn't move nodes; a tap opens the entry.
   - **Re-layout** replaces the positions of the visible nodes after a confirmation. Hidden nodes keep theirs.
 - **Saving:** about 800 ms after a drag, the full position map is saved with the `layout.json` SHA (one request at a time; later moves are sent next). A conflict reloads. A save that changes nothing is not written; a move still waiting for its timer is sent with `keepalive` when the page is left.
 - **Libraries:** `@xyflow/react` 12.12.0 and `elkjs` 0.12.0, pinned exactly.

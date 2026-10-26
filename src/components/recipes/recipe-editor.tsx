@@ -278,7 +278,7 @@ function JsonEditor({
         autoCorrect="off"
         rows={14}
         aria-describedby={`${id}-hint`}
-        className="min-h-48 w-full rounded-md border border-border bg-bg p-3 font-mono text-sm text-text"
+        className="min-h-48 w-full rounded-md border border-border bg-bg p-3 font-mono text-base text-text"
       />
       <p id={`${id}-hint`} className="text-sm text-muted">
         {t("recipe.jsonHint")}
