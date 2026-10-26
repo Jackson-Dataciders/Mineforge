@@ -737,3 +737,19 @@ export const summarizeEntry = (entry: Entry): EntrySummary => ({
   type: entry.type,
   status: entry.status,
 });
+
+/**
+ * Item IDs a recipe consumes: every item alternative of its ingredients
+ * (tags excluded), and for custom recipes only the inputs.
+ */
+export function recipeIngredientItems(recipe: EntryRecipe): string[] {
+  if (recipe.type !== "custom") return recipeItems(recipe);
+  return recipe.inputs.flatMap((input) =>
+    input.type !== "item"
+      ? []
+      : (Array.isArray(input.ingredient)
+          ? input.ingredient
+          : [input.ingredient]
+        ).flatMap((v) => ("item" in v ? [v.item] : [])),
+  );
+}

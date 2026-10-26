@@ -12,8 +12,8 @@ import { fetchJson } from "@/lib/fetch-json";
 
 /**
  * Header of a custom mod's pages: name, ID, the current phase (spec 05) and
- * the Entries | Taskboard tabs. A phase change reloads the page data, so
- * every form on the page gets the new `mod.json` SHA.
+ * the Entries | Taskboard | Mind map tabs. A phase change reloads the page
+ * data, so every form on the page gets the new `mod.json` SHA.
  */
 export function ModHeader({
   modId,
@@ -54,6 +54,7 @@ export function ModHeader({
   const tabs = [
     { href: `/designer/${modId}`, label: t("designer.tabs.entries") },
     { href: `/designer/${modId}/tasks`, label: t("designer.tabs.tasks") },
+    { href: `/designer/${modId}/map`, label: t("designer.tabs.map") },
   ];
 
   return (

@@ -26,3 +26,4 @@ An ADR records one decision that is hard to reverse or affects other features. W
 | 0020 | [Recipe change and pack task formats](0020-recipe-change-and-pack-task-formats.md)                               | accepted                              |
 | 0021 | [Entry and custom recipe type formats](0021-entry-and-custom-recipe-type-formats.md)                             | accepted                              |
 | 0022 | [Designer task state](0022-designer-task-state.md)                                                               | accepted                              |
+| 0023 | [Mind map graph and layout](0023-mind-map-graph-and-layout.md)                                                   | accepted                              |

@@ -40,3 +40,24 @@
     background: color-mix(in srgb, var(--text) 40%, transparent);
   }
 }
+
+/*
+ * Mind map (xyflow, spec 06): its CSS variables mapped to the theme tokens.
+ * Only the structural base.css of xyflow is loaded; nodes are styled in the
+ * components.
+ */
+.mf-map .react-flow {
+  --xy-background-color: var(--bg);
+  --xy-background-pattern-color: var(--border);
+  --xy-edge-stroke: var(--muted);
+  --xy-edge-stroke-selected: var(--accent);
+  --xy-handle-background-color: transparent;
+  --xy-selection-background-color: transparent;
+  --xy-selection-border: 1px dashed var(--accent);
+  --xy-attribution-background-color: var(--surface);
+  background: var(--bg);
+}
+
+.mf-map .react-flow__attribution a {
+  color: var(--muted);
+}

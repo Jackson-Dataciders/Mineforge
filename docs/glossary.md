@@ -20,6 +20,8 @@ These terms are canonical. Use them, with exactly these meanings, in code identi
 
 **Generated task** — A task computed from entry data by a rule for the current phase (`plan_out`, `implement`, `polish`). It is never stored as a task; only its per-key state is (in progress, or a done record). Its stable key is `<rule-id>:<entry-id>`. Completing it advances the entry status (polish changes none); a done generated task is kept with a **done record** (entry name and type at completion) across phase and status changes (ADR 0022). Code: `GeneratedTask`, `GENERATED_RULES`.
 
+**Mind map** — A custom mod's graph of its entries (and, behind a filter, outside items used as ingredients), with edges derived from recipes (`ingredient_of`), relations, multiblocks (`part_of_multiblock`), custom recipe machines (`made_in`) and mechanics (`involved_in`). Only node positions are stored, in the **layout** (`layout.json`). Code: `MindMap`, `buildMindMap` (ADR 0023).
+
 **Taskboard** — A custom mod's board of generated and manual tasks in three columns: To do, In progress, Done (`TaskColumn`: `to_do`, `in_progress`, `done`), filterable by phase. Code: `Taskboard`.
 
 **Manual task** — A task the user creates by hand, stored with its own ID in a `tasks.json`. Custom mods have manual tasks (optional linked entry and phase, a column) next to generated tasks; modpacks have manual tasks next to KubeJS tasks. Completing one changes nothing else. Code: `ManualTask` (pack tasks: `type: "manual"`).
