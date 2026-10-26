@@ -78,6 +78,8 @@ export const en = {
     invalidIcon: "The icon must be a 16×16 PNG of at most 16 KB.",
     invalidMachine:
       "The machine must be a block or multiblock entry of this mod.",
+    taskNotMovable:
+      "This task can no longer be moved there. The board has been reloaded.",
   },
   library: {
     link: "Library",
@@ -228,6 +230,43 @@ export const en = {
     delete: "Delete task",
   },
   designer: {
+    tabs: {
+      label: "Custom mod sections",
+      entries: "Entries",
+      tasks: "Taskboard",
+    },
+    phase: {
+      label: "Current phase",
+      apply: "Change phase",
+    },
+    tasks: {
+      hint: "Generated tasks follow the entry statuses in the current phase. Moving one to Done advances its entry; moving it out of Done reverts the status.",
+      columns: {
+        to_do: "To do",
+        in_progress: "In progress",
+        done: "Done",
+      },
+      rules: {
+        plan_out: "Plan out {type}: {name}",
+        implement: "Implement {type}: {name}",
+        polish: "Balance/polish {type}: {name}",
+      },
+      generated: "Generated",
+      newTitle: "New task",
+      entryLabel: "Linked entry",
+      noEntry: "None",
+      phaseLabel: "Phase",
+      noPhase: "Any phase",
+      add: "Add task",
+      filterLabel: "Show phase",
+      allPhases: "All phases",
+      moveTask: "Move “{title}” to {column}",
+      delete: "Delete task “{title}”",
+      empty: "No tasks.",
+      lockedPhase: "Done in another phase",
+      lockedDeleted: "Entry deleted",
+      lockedStatus: "The entry's status has changed since",
+    },
     entriesTitle: "Entries",
     noEntries: "No entries yet. Create one with the buttons above.",
     newEntry: "New {type}",
@@ -363,6 +402,11 @@ export const en = {
     backlog: "Backlog",
     planned: "Planned",
     implemented: "Implemented",
+  },
+  phases: {
+    planning: "Planning",
+    implementation: "Implementation",
+    optimization: "Optimization",
   },
   fields: {
     name: "Name (English)",

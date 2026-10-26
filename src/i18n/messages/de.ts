@@ -81,6 +81,8 @@ export const de: Messages = {
     invalidIcon: "Das Icon muss ein 16×16-PNG mit höchstens 16 KB sein.",
     invalidMachine:
       "Die Maschine muss ein Block- oder Multiblock-Eintrag dieser Mod sein.",
+    taskNotMovable:
+      "Diese Aufgabe lässt sich dorthin nicht mehr verschieben. Das Board wurde neu geladen.",
   },
   library: {
     link: "Bibliothek",
@@ -235,6 +237,43 @@ export const de: Messages = {
     delete: "Aufgabe löschen",
   },
   designer: {
+    tabs: {
+      label: "Bereiche der eigenen Mod",
+      entries: "Einträge",
+      tasks: "Taskboard",
+    },
+    phase: {
+      label: "Aktuelle Phase",
+      apply: "Phase wechseln",
+    },
+    tasks: {
+      hint: "Generierte Aufgaben folgen den Status der Einträge in der aktuellen Phase. Nach „Erledigt“ verschieben bringt den Eintrag weiter; aus „Erledigt“ heraus verschieben setzt den Status zurück.",
+      columns: {
+        to_do: "Offen",
+        in_progress: "In Arbeit",
+        done: "Erledigt",
+      },
+      rules: {
+        plan_out: "Ausplanen ({type}): {name}",
+        implement: "Umsetzen ({type}): {name}",
+        polish: "Balancing/Feinschliff ({type}): {name}",
+      },
+      generated: "Generiert",
+      newTitle: "Neue Aufgabe",
+      entryLabel: "Verknüpfter Eintrag",
+      noEntry: "Keiner",
+      phaseLabel: "Phase",
+      noPhase: "Jede Phase",
+      add: "Aufgabe hinzufügen",
+      filterLabel: "Phase anzeigen",
+      allPhases: "Alle Phasen",
+      moveTask: "„{title}“ nach {column} verschieben",
+      delete: "Aufgabe „{title}“ löschen",
+      empty: "Keine Aufgaben.",
+      lockedPhase: "In einer anderen Phase erledigt",
+      lockedDeleted: "Eintrag gelöscht",
+      lockedStatus: "Der Status des Eintrags hat sich seitdem geändert",
+    },
     entriesTitle: "Einträge",
     noEntries: "Noch keine Einträge. Lege mit den Schaltflächen oben einen an.",
     newEntry: "Neu: {type}",
@@ -373,6 +412,11 @@ export const de: Messages = {
     backlog: "Backlog",
     planned: "Geplant",
     implemented: "Umgesetzt",
+  },
+  phases: {
+    planning: "Planung",
+    implementation: "Umsetzung",
+    optimization: "Optimierung",
   },
   fields: {
     name: "Name (Englisch)",

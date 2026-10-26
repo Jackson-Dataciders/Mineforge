@@ -1,15 +1,22 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { EntrySummary } from "@/components/designer/designer-context";
+import { ModHeader } from "@/components/designer/mod-header";
 import {
   ModDependencies,
   RecipeTypesSection,
 } from "@/components/designer/mod-settings";
+import { StatusIcon } from "@/components/designer/status-icon";
 import { ItemIcon } from "@/components/items/item-icon";
 import type { Incompatibility } from "@/components/library/compat-badge";
 import { targetCompatibility } from "@/domain/compatibility";
-import { ENTRY_TYPES, usedRecipeTypes, type EntryStatus } from "@/domain/entry";
+import {
+  ENTRY_TYPES,
+  summarizeEntry,
+  usedRecipeTypes,
+  type EntryStatus,
+  type EntrySummary,
+} from "@/domain/entry";
 import { entryIconPath } from "@/domain/item-sources";
 import type { LibraryMeta } from "@/domain/library";
 import { getT } from "@/i18n/server";
@@ -32,7 +39,7 @@ function incompatibilityOf(meta: LibraryMeta): Incompatibility | null {
     : { reason: "version", range: meta.minecraftVersionRange ?? "" };
 }
 
-/** A custom mod: its entries, dependencies and custom recipe types (spec 04). */
+/** A custom mod: its entries, dependencies and custom recipe types (spec 04), phase (spec 05). */
 export default async function CustomModPage({
   params,
 }: PageProps<"/designer/[modId]">) {
@@ -46,19 +53,11 @@ export default async function CustomModPage({
     listEntries(storage, modId),
     loadLibraryMetas(storage),
   ]);
-  const summaries: EntrySummary[] = entries.map((e) => ({
-    id: e.data.id,
-    name: e.data.name,
-    type: e.data.type,
-  }));
+  const summaries = entries.map((e) => summarizeEntry(e.data));
   const usersByType: Record<string, EntrySummary[]> = {};
   for (const { data } of entries) {
     for (const typeId of usedRecipeTypes(data)) {
-      (usersByType[typeId] ??= []).push({
-        id: data.id,
-        name: data.name,
-        type: data.type,
-      });
+      (usersByType[typeId] ??= []).push(summarizeEntry(data));
     }
   }
   const library = [...metas.values()]
@@ -71,12 +70,13 @@ export default async function CustomModPage({
 
   return (
     <div className="flex max-w-5xl flex-col gap-6">
-      <header>
-        <h1 className="text-xl font-semibold">{mod.data.name}</h1>
-        <p className="font-mono text-sm text-muted">
-          {t("projects.idValue", { id: modId })}
-        </p>
-      </header>
+      <ModHeader
+        key={mod.sha}
+        modId={modId}
+        name={mod.data.name}
+        phase={mod.data.phase}
+        sha={mod.sha}
+      />
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">{t("designer.entriesTitle")}</h2>
@@ -128,8 +128,13 @@ export default async function CustomModPage({
                           {/* The tint sits on its own surface base, also when the row is hovered (ADR 0011). */}
                           <span className="rounded-full bg-surface">
                             <span
-                              className={`block rounded-full px-2 text-xs text-text ${STATUS_TINT[data.status]}`}
+                              className={`flex items-center gap-1 rounded-full py-0.5 pr-2 pl-1 text-xs text-text ${STATUS_TINT[data.status]}`}
                             >
+                              <StatusIcon
+                                status={data.status}
+                                inTint
+                                decorative
+                              />
                               {t(`statuses.${data.status}`)}
                             </span>
                           </span>

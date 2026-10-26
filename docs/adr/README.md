@@ -13,7 +13,7 @@ An ADR records one decision that is hard to reverse or affects other features. W
 | 0007 | [Target Minecraft 1.21.1 on NeoForge](0007-target-minecraft-1-21-1-neoforge.md)                                  | accepted                              |
 | 0008 | [KubeJS server scripts for modpack recipe changes](0008-kubejs-export.md)                                        | accepted                              |
 | 0009 | [Entry types as Zod discriminated unions](0009-entry-types-zod-discriminated-unions.md)                          | accepted                              |
-| 0010 | [Designer tasks derived from data](0010-derived-designer-tasks.md)                                               | accepted                              |
+| 0010 | [Designer tasks derived from data](0010-derived-designer-tasks.md)                                               | accepted (task state refined by 0022) |
 | 0011 | [Theming with semantic tokens from one source](0011-theming-semantic-tokens.md)                                  | accepted                              |
 | 0012 | [i18n with a typed in-repo catalog](0012-i18n-typed-catalog.md)                                                  | accepted                              |
 | 0013 | [Dynamic rendering; session check per segment](0013-dynamic-rendering-session-checks.md)                         | accepted                              |
@@ -25,3 +25,4 @@ An ADR records one decision that is hard to reverse or affects other features. W
 | 0019 | [Mod logo in library meta](0019-mod-logo-in-library-meta.md)                                                     | accepted                              |
 | 0020 | [Recipe change and pack task formats](0020-recipe-change-and-pack-task-formats.md)                               | accepted                              |
 | 0021 | [Entry and custom recipe type formats](0021-entry-and-custom-recipe-type-formats.md)                             | accepted                              |
+| 0022 | [Designer task state](0022-designer-task-state.md)                                                               | accepted                              |

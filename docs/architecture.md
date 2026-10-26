@@ -19,7 +19,12 @@
 **Phase 4 (Mod Designer entries, spec `docs/specs/04-mod-designer-entries.md`):**
 
 - exists: entries of six types with Zod discriminated unions (ADR 0009, 0021), entry recipes including custom machine recipe types, relations, the 16×16 pixel editor and entry icons, custom mod dependencies, the designer item set; the pack item set includes planned/implemented entries.
-- planned: designer tasks and taskboard (phase 5), mind map (phase 6).
+- planned at the time: designer tasks and taskboard (phase 5), mind map (phase 6).
+
+**Phase 5 (Designer tasks, spec `docs/specs/05-designer-tasks.md`):**
+
+- exists: the current phase select and Entries | Taskboard tabs, generated task rules with stored per-key state and done records (ADR 0010, 0022), manual tasks, the taskboard with drag and drop, move buttons and a phase filter, entry status icons.
+- planned: mind map (phase 6).
 
 ## System overview
 
@@ -51,26 +56,27 @@ flowchart LR
 
 ## Components
 
-| Component         | Responsibility                                                                                                                                                                                                                    | Status     |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Next.js app       | UI for Mod Designer and Modpack Planner, server components, route handlers (ADR 0001, 0013)                                                                                                                                       | exists     |
-| Proxy             | `src/proxy.ts`: every request needs the allowlisted session; pages → `/sign-in`, API → 401 (ADR 0004)                                                                                                                             | exists     |
-| Auth              | `src/server/auth.ts` (Auth.js, GitHub provider, allowlist), `src/server/session.ts` (`requireUser`, `getAllowedUser`)                                                                                                             | exists     |
-| Storage layer     | `src/storage/`: backend interface, GitHub and in-memory backends, documents, repositories (ADR 0002)                                                                                                                              | exists     |
-| GitHub App client | `src/server/github-app.ts`: one installation token per request, repo-scoped, contents write (ADR 0003)                                                                                                                            | exists     |
-| Texture routes    | `/api/textures/[...path]` → `assets/textures/`, `/api/icons/[...path]` → `assets/icons/`, behind auth (ADR 0004)                                                                                                                  | exists     |
-| i18n              | `src/i18n/`: typed en/de catalogs, cookie locale (ADR 0012)                                                                                                                                                                       | exists     |
-| Theming           | `src/theme/`: tokens for 3 themes × light/dark, CSS render, contrast test (ADR 0011)                                                                                                                                              | exists     |
-| App shell         | `src/components/shell/`: view switcher, project selector with create/rename/delete, settings                                                                                                                                      | exists     |
-| Dev fake mode     | In-memory storage + fake login under `next dev` only (ADR 0014)                                                                                                                                                                   | exists     |
-| Domain            | `src/domain/`: IDs, project and library schemas, recipe model, recipe changes, KubeJS export, pack tasks, compatibility, search, entry schemas (`entry.ts`), custom recipe types, pixel image core; designer task rules (planned) | partial    |
-| Library page      | `/library`: library mods with logo, counts and compatibility badge; pending jars; "Upload jars" (spec 03)                                                                                                                         | exists     |
-| Jar upload        | `POST /api/upload-token` (scoped token), browser `git/blobs`, `POST /api/jars` commits through storage (ADR 0005)                                                                                                                 | exists     |
-| Modpack Planner   | `/modpacks/[packId]`: mods, warnings, recipe changes, tasks; editor at `/modpacks/[packId]/recipe-changes/new` and `/[changeId]`                                                                                                  | exists     |
-| Item search modal | `src/components/items/item-search-dialog.tsx`: shared, fuzzy, capped, items or tags (reused by the designer in phase 4)                                                                                                           | exists     |
-| Extraction script | `tools/extract-jar.ts` + `tools/extract-jar/`: deterministic jar → data (ADR 0006, 0017)                                                                                                                                          | exists     |
-| import-mods skill | `.claude/skills/import-mods/SKILL.md`: runs the script, adds inferred data, commits (ADR 0006)                                                                                                                                    | exists     |
-| Vercel build skip | `vercel.json` `ignoreCommand`: skips builds for commits touching only `data/`, `assets/`, `jars/` (ADR 0002)                                                                                                                      | configured |
+| Component         | Responsibility                                                                                                                                                                                                                                | Status     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Next.js app       | UI for Mod Designer and Modpack Planner, server components, route handlers (ADR 0001, 0013)                                                                                                                                                   | exists     |
+| Proxy             | `src/proxy.ts`: every request needs the allowlisted session; pages → `/sign-in`, API → 401 (ADR 0004)                                                                                                                                         | exists     |
+| Auth              | `src/server/auth.ts` (Auth.js, GitHub provider, allowlist), `src/server/session.ts` (`requireUser`, `getAllowedUser`)                                                                                                                         | exists     |
+| Storage layer     | `src/storage/`: backend interface, GitHub and in-memory backends, documents, repositories (ADR 0002)                                                                                                                                          | exists     |
+| GitHub App client | `src/server/github-app.ts`: one installation token per request, repo-scoped, contents write (ADR 0003)                                                                                                                                        | exists     |
+| Texture routes    | `/api/textures/[...path]` → `assets/textures/`, `/api/icons/[...path]` → `assets/icons/`, behind auth (ADR 0004)                                                                                                                              | exists     |
+| i18n              | `src/i18n/`: typed en/de catalogs, cookie locale (ADR 0012)                                                                                                                                                                                   | exists     |
+| Theming           | `src/theme/`: tokens for 3 themes × light/dark, CSS render, contrast test (ADR 0011)                                                                                                                                                          | exists     |
+| App shell         | `src/components/shell/`: view switcher, project selector with create/rename/delete, settings                                                                                                                                                  | exists     |
+| Dev fake mode     | In-memory storage + fake login under `next dev` only (ADR 0014)                                                                                                                                                                               | exists     |
+| Domain            | `src/domain/`: IDs, project and library schemas, recipe model, recipe changes, KubeJS export, pack tasks, compatibility, search, entry schemas (`entry.ts`), custom recipe types, pixel image core, designer task rules (`designer-tasks.ts`) | exists     |
+| Library page      | `/library`: library mods with logo, counts and compatibility badge; pending jars; "Upload jars" (spec 03)                                                                                                                                     | exists     |
+| Jar upload        | `POST /api/upload-token` (scoped token), browser `git/blobs`, `POST /api/jars` commits through storage (ADR 0005)                                                                                                                             | exists     |
+| Modpack Planner   | `/modpacks/[packId]`: mods, warnings, recipe changes, tasks; editor at `/modpacks/[packId]/recipe-changes/new` and `/[changeId]`                                                                                                              | exists     |
+| Mod Designer      | `/designer/[modId]`: header with phase and tabs, entries, dependencies, recipe types; entry forms at `/entries/new` and `/entries/[entryPath]`; taskboard at `/designer/[modId]/tasks` (spec 04, 05)                                          | exists     |
+| Item search modal | `src/components/items/item-search-dialog.tsx`: shared, fuzzy, capped, items or tags (reused by the designer in phase 4)                                                                                                                       | exists     |
+| Extraction script | `tools/extract-jar.ts` + `tools/extract-jar/`: deterministic jar → data (ADR 0006, 0017)                                                                                                                                                      | exists     |
+| import-mods skill | `.claude/skills/import-mods/SKILL.md`: runs the script, adds inferred data, commits (ADR 0006)                                                                                                                                                | exists     |
+| Vercel build skip | `vercel.json` `ignoreCommand`: skips builds for commits touching only `data/`, `assets/`, `jars/` (ADR 0002)                                                                                                                                  | configured |
 
 ## Source layers
 
@@ -126,29 +132,34 @@ ESLint (`eslint.config.mjs`) enforces the key boundaries:
 - **Recipe changes** (`recipe-changes.ts`): create, edit and delete each write the change file and `tasks.json` in one commit (ADR 0020). Pack task writes (`pack-tasks.ts`) use the `tasks.json` SHA the client last saw.
 - **Entries** (`entries.ts`): listed with one tree call and read through the SHA-keyed cache (`cached.ts`). Create/update write the entry and its icon (`assets/icons/<modid>/<path>.png`, validated 16×16 PNG) in one commit and check relation targets and recipe types (references the stored version already had stay allowed). Delete removes the entry, its icon and manual relations to it in other entries, in one commit (ADR 0021).
 - **Custom mods** (`custom-mods.ts`): dependencies (existing library mods only) and recipe types (machine must be a block or multiblock entry) are written to `mod.json` with its SHA.
+- **Designer tasks** (`designer-tasks.ts`): every write expects the `tasks.json` SHA the client last saw and the current `mod.json` SHA, prunes stale in-progress state and skips writes that change nothing. Phase changes and entry updates or deletes prune it in their own commit (`task-prune.ts`); they always expect the `tasks.json` SHA, and entry updates and deletes also the `mod.json` SHA. Completing or reopening a generated task writes the entry's new status and `tasks.json` in one commit (ADR 0022). The phase is set in `custom-mods.ts`.
 - **Item sets** (`pack-items.ts`): `loadPackItemSources` (vanilla + pack library mods + planned/implemented item/block entries of the pack's custom mods) and `loadDesignerItemSources` (vanilla + declared dependencies + all item/block entries).
 
 ## API routes
 
 All are wrapped in `apiRoute()` (session check, error mapping).
 
-| Route                                                     | Methods                  | Purpose                                                            |
-| --------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------ |
-| `/api/custom-mods[/[modId]]`, `/api/modpacks[/[packId]]`  | GET, POST, PATCH, DELETE | projects (phase 1)                                                 |
-| `/api/custom-mods/[modId]/dependencies`                   | PUT                      | set the custom mod's library dependencies                          |
-| `/api/custom-mods/[modId]/recipe-types[/[typeId]]`        | POST, PUT, DELETE        | custom machine recipe types                                        |
-| `/api/custom-mods/[modId]/entries[/[entryPath]]`          | POST, PUT, DELETE        | entries with their icon (base64 PNG in the body)                   |
-| `/api/custom-mods/[modId]/search-set`                     | GET                      | the designer item set                                              |
-| `/api/textures/[...path]`, `/api/icons/[...path]`         | GET                      | PNGs from `assets/` with ETag                                      |
-| `/api/upload-token`                                       | POST                     | scoped installation token + blobs URL for the browser (`no-store`) |
-| `/api/dev-fake/blobs`                                     | POST                     | fake mode only: stands in for `git/blobs`; 404 otherwise           |
-| `/api/jars`                                               | POST                     | commit uploaded blobs to `jars/mods/` in one commit                |
-| `/api/modpacks/[packId]/mods`                             | PUT                      | set the pack's library and custom mods                             |
-| `/api/modpacks/[packId]/search-set`                       | GET                      | items and tags of the pack's item set                              |
-| `/api/modpacks/[packId]/recipes?item=`                    | GET                      | existing recipes producing an item                                 |
-| `/api/modpacks/[packId]/recipe-changes[/[changeId]]`      | POST, PUT, DELETE        | recipe changes (with their KubeJS task)                            |
-| `/api/modpacks/[packId]/recipe-changes/[changeId]/script` | GET                      | KubeJS script download                                             |
-| `/api/modpacks/[packId]/tasks[/[taskId]]`                 | POST, PATCH, DELETE      | manual tasks; check/uncheck                                        |
+| Route                                                     | Methods                  | Purpose                                                                |
+| --------------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------- |
+| `/api/custom-mods[/[modId]]`, `/api/modpacks[/[packId]]`  | GET, POST, PATCH, DELETE | projects (phase 1)                                                     |
+| `/api/custom-mods/[modId]/dependencies`                   | PUT                      | set the custom mod's library dependencies                              |
+| `/api/custom-mods/[modId]/recipe-types[/[typeId]]`        | POST, PUT, DELETE        | custom machine recipe types                                            |
+| `/api/custom-mods/[modId]/entries[/[entryPath]]`          | POST, PUT, DELETE        | entries with their icon (base64 PNG in the body)                       |
+| `/api/custom-mods/[modId]/search-set`                     | GET                      | the designer item set                                                  |
+| `/api/custom-mods/[modId]/phase`                          | PUT                      | set the current phase                                                  |
+| `/api/custom-mods/[modId]/tasks`                          | POST                     | add a manual task                                                      |
+| `/api/custom-mods/[modId]/tasks/move`                     | POST                     | move a generated or manual task (Done completes, leaving Done reopens) |
+| `/api/custom-mods/[modId]/tasks/[taskId]`                 | DELETE                   | delete a manual task                                                   |
+| `/api/textures/[...path]`, `/api/icons/[...path]`         | GET                      | PNGs from `assets/` with ETag                                          |
+| `/api/upload-token`                                       | POST                     | scoped installation token + blobs URL for the browser (`no-store`)     |
+| `/api/dev-fake/blobs`                                     | POST                     | fake mode only: stands in for `git/blobs`; 404 otherwise               |
+| `/api/jars`                                               | POST                     | commit uploaded blobs to `jars/mods/` in one commit                    |
+| `/api/modpacks/[packId]/mods`                             | PUT                      | set the pack's library and custom mods                                 |
+| `/api/modpacks/[packId]/search-set`                       | GET                      | items and tags of the pack's item set                                  |
+| `/api/modpacks/[packId]/recipes?item=`                    | GET                      | existing recipes producing an item                                     |
+| `/api/modpacks/[packId]/recipe-changes[/[changeId]]`      | POST, PUT, DELETE        | recipe changes (with their KubeJS task)                                |
+| `/api/modpacks/[packId]/recipe-changes/[changeId]/script` | GET                      | KubeJS script download                                                 |
+| `/api/modpacks/[packId]/tasks[/[taskId]]`                 | POST, PATCH, DELETE      | manual tasks; check/uncheck                                            |
 
 ## Data layout
 
@@ -175,7 +186,7 @@ tools/extract-jar.ts                deterministic extraction CLI (spec 02)
 | `.../tags.json`                                           | `itemTagsSchema`: `{ "<tag-id>": { replace, values: ["<item-id>" or "#<tag-id>" or { id, required }] } }`                                                                                                                            | extraction         | exists  |
 | `data/library/<modid>/meta.json`                          | `libraryMetaSchema`: modId, name, version, loader (`neoforge`/`forge`/`fabric`), minecraftVersionRange, modIds, jarFile, jarSha256, dependencies, logo (ADR 0019); non-NeoForge-1.21.1 mods are imported but warned about (ADR 0016) | extraction         | exists  |
 | `data/custom-mods/<modid>/layout.json`                    | mind map node positions per entry ID                                                                                                                                                                                                 | app                | planned |
-| `data/custom-mods/<modid>/tasks.json`                     | manual tasks; per-key state for generated tasks if the Designer spec needs it                                                                                                                                                        | app                | planned |
+| `data/custom-mods/<modid>/tasks.json`                     | `designerTasksSchema`: `{ manual: [{ id, title, entryId, phase, column }], generated: { "<rule>:<entry id>": { column: "in_progress" } or { column: "done", entryName, entryType } } }` (ADR 0022)                                   | app                | exists  |
 | `data/custom-mods/<modid>/entries/<path>.json`            | `entrySchema`: `{ id (<modid>:<path>), type, kind?, name, description, status, tags, icon, usage, notes, relations }` + type-specific fields; `recipes` on item/block entries (ADR 0009, 0021)                                       | app                | exists  |
 | `data/modpacks/<pack-id>/tasks.json`                      | `packTasksSchema`: `{ tasks: [{ id, type: "manual", title, done } or { id, type: "kubejs", recipeChangeId, done }] }` (ADR 0020)                                                                                                     | app                | exists  |
 | `data/modpacks/<pack-id>/recipe-changes/<change-id>.json` | `recipeChangeSchema`: `{ id, item, itemName, action: "add" \| "replace" \| "remove", replacedRecipeId? / removedRecipeId?, recipe? }`; `recipe` is a visual type or `{ type: "json", data }` (ADR 0020)                              | app                | exists  |
@@ -295,6 +306,19 @@ flowchart LR
   L --> X["generateKubeJsScript — pure, src/domain/kubejs.ts"]
   X --> T["script text: ServerEvents.recipes(event => …)"]
   T --> D["pack task: Export script → download one .js per recipe change (ADR 0018)"]
+```
+
+### Designer taskboard
+
+```mermaid
+flowchart LR
+  E["entries + current phase"] --> R["rules (src/domain/designer-tasks.ts)"]
+  S["tasks.json: in-progress + done records, manual tasks"] --> R
+  R --> B["board: To do / In progress / Done"]
+  B -->|"move (drag or button)"| M["POST tasks/move"]
+  M -->|"→ Done / out of Done"| C["entry status + tasks.json, one commit"]
+  M -->|"other moves"| T["tasks.json only"]
+  P["phase change / entry save or delete"] -->|"same commit, expects tasks.json SHA"| X["prune stale in-progress state (task-prune.ts)"]
 ```
 
 ## Environment variables

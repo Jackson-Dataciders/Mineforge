@@ -50,12 +50,14 @@ export function SelectField<T extends string>({
   options,
   onChange,
   className = "",
+  disabled = false,
 }: {
   label: string;
   value: T;
   options: readonly { value: T; label: string }[];
   onChange: (value: T) => void;
   className?: string;
+  disabled?: boolean;
 }) {
   const id = useId();
   return (
@@ -67,6 +69,7 @@ export function SelectField<T extends string>({
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
+        disabled={disabled}
         className={`${INPUT} px-2`}
       >
         {options.map((o) => (

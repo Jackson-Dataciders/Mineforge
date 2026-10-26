@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { EntryEditor } from "@/components/designer/entry-editor";
-import { isEntryType } from "@/domain/entry";
+import { isEntryType, summarizeEntry } from "@/domain/entry";
 import { requireUser } from "@/server/session";
 import { getStorage, loadCustomMods } from "@/storage";
 import { listEntries } from "@/storage/entries";
@@ -21,11 +21,7 @@ export default async function NewEntryPage({
       modId={modId}
       modName={mod.data.name}
       mode={{ kind: "new", type }}
-      entries={entries.map((e) => ({
-        id: e.data.id,
-        name: e.data.name,
-        type: e.data.type,
-      }))}
+      entries={entries.map((e) => summarizeEntry(e.data))}
       recipeTypes={mod.data.recipeTypes}
       referencedBy={[]}
     />

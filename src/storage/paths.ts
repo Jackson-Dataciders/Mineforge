@@ -3,6 +3,7 @@ export const paths = {
   customModsDir: "data/custom-mods",
   customModDir: (modId: string) => `data/custom-mods/${modId}`,
   customModFile: (modId: string) => `data/custom-mods/${modId}/mod.json`,
+  customModTasksFile: (modId: string) => `data/custom-mods/${modId}/tasks.json`,
   customModIconsDir: (modId: string) => `assets/icons/${modId}`,
   entriesDir: (modId: string) => `data/custom-mods/${modId}/entries`,
   entryFile: (modId: string, path: string) =>

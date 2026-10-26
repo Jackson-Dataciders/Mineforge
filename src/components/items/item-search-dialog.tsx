@@ -10,6 +10,7 @@ import {
   type SearchItem,
 } from "@/domain/item-search";
 import { useT } from "@/i18n/client";
+import { StatusIcon } from "@/components/designer/status-icon";
 import { ItemIcon } from "./item-icon";
 
 export type ItemSelection =
@@ -140,6 +141,7 @@ export function ItemSearchDialog({
                     <span className="flex min-w-0 flex-1 flex-col">
                       <span className="flex flex-wrap items-center gap-x-2">
                         <span className="font-medium">{item.name}</span>
+                        {item.status && <StatusIcon status={item.status} />}
                         {item.source === "inferred" && <InferredBadge />}
                       </span>
                       <span className="truncate text-xs text-muted">

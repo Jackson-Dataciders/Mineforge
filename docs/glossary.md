@@ -2,7 +2,7 @@
 
 These terms are canonical. Use them, with exactly these meanings, in code identifiers, file names, UI strings and docs. Do not introduce synonyms (e.g. "element", "addon", "card", "todo").
 
-**Custom mod** — A mod the user designs in the Mod Designer. Stored in `data/custom-mods/<modid>/`. It has a mod ID, a current phase, entries, a layout (mind map positions) and manual tasks. Code: `CustomMod`.
+**Custom mod** — A mod the user designs in the Mod Designer. Stored in `data/custom-mods/<modid>/`. It has a mod ID, a current phase, entries, a layout (mind map positions) and a taskboard. Code: `CustomMod`.
 
 **Library mod** — A third-party mod imported from a jar into the global library. Stored in `data/library/<modid>/`, created only by the `import-mods` skill, read-only in the app. Vanilla Minecraft data (`data/vanilla/1.21.1/`) is used alongside library mods but is not itself a library mod. Code: `LibraryMod`.
 
@@ -14,13 +14,15 @@ These terms are canonical. Use them, with exactly these meanings, in code identi
 
 **Kind** — A subcategory within an entry type, stored in `kind`, which adds its own fields. For example, an item may be a tool or a food. Kinds exist only where a type's Zod schema defines them, and that schema is the only list of valid kinds. Code: `kind`, never "subtype" or "category".
 
-**Status** — An entry's progress: `backlog` → `planned` → `implemented`. Completing a generated task advances it (ADR 0010); the user can also set it directly. Code: `EntryStatus`.
+**Status** — An entry's progress: `backlog` → `planned` → `implemented`. Completing a generated task advances it, moving it out of Done reverts it (ADR 0010, 0022); the user can also set it directly. Shown as a status icon wherever entries appear. Code: `EntryStatus`.
 
 **Phase** — A custom mod's current project stage: `planning`, `implementation` or `optimization`. Each custom mod has exactly one current phase, which decides which generated tasks exist. Phases belong to custom mods; entries have a status, not a phase. Code: `ProjectPhase`.
 
-**Generated task** — A task computed from entry data by a rule for the current phase. It is never stored as a task. Its stable key is `<rule-id>:<entry-id>`. Completing it advances the entry status. Code: `GeneratedTask`.
+**Generated task** — A task computed from entry data by a rule for the current phase (`plan_out`, `implement`, `polish`). It is never stored as a task; only its per-key state is (in progress, or a done record). Its stable key is `<rule-id>:<entry-id>`. Completing it advances the entry status (polish changes none); a done generated task is kept with a **done record** (entry name and type at completion) across phase and status changes (ADR 0022). Code: `GeneratedTask`, `GENERATED_RULES`.
 
-**Manual task** — A task the user creates by hand, stored with its own ID in a `tasks.json`. Custom mods have manual tasks next to generated tasks; modpacks have manual tasks next to KubeJS tasks. Completing one changes nothing else. Code: `ManualTask` (pack tasks: `type: "manual"`).
+**Taskboard** — A custom mod's board of generated and manual tasks in three columns: To do, In progress, Done (`TaskColumn`: `to_do`, `in_progress`, `done`), filterable by phase. Code: `Taskboard`.
+
+**Manual task** — A task the user creates by hand, stored with its own ID in a `tasks.json`. Custom mods have manual tasks (optional linked entry and phase, a column) next to generated tasks; modpacks have manual tasks next to KubeJS tasks. Completing one changes nothing else. Code: `ManualTask` (pack tasks: `type: "manual"`).
 
 **KubeJS task** — A modpack task created automatically when a recipe change is saved, titled "Write KubeJS: <item name>" (the title comes from i18n, not from data). It offers "Export script" for its recipe change, is unchecked again when the change is edited, and is removed with the change (ADR 0020). Stored in the pack's `tasks.json` with `type: "kubejs"` and `recipeChangeId`. Code: `PackTask` with `type: "kubejs"`.
 

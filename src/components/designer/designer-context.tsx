@@ -3,11 +3,10 @@
 import { createContext, use, type ReactNode } from "react";
 import type { ItemLookup } from "@/components/recipes/recipe-slot";
 import type { CustomRecipeType } from "@/domain/custom-recipe";
-import type { EntryType } from "@/domain/entry";
+import type { EntrySummary } from "@/domain/entry";
 import type { SearchItem } from "@/domain/item-search";
 
-/** What the entry form shows about the mod's other entries. */
-export type EntrySummary = { id: string; name: string; type: EntryType };
+export type { EntrySummary };
 
 export type DesignerData = {
   modId: string;

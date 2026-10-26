@@ -10,6 +10,7 @@ import type { ItemStack } from "@/domain/entry";
 import { resourceIdSchema } from "@/domain/library";
 import { useT } from "@/i18n/client";
 import { useDesigner } from "./designer-context";
+import { StatusIcon } from "./status-icon";
 
 function Chip({ text, onRemove }: { text: string; onRemove: () => void }) {
   const t = useT();
@@ -280,6 +281,7 @@ export function EntryCheckboxList({
             }
             className="size-5 accent-accent"
           />
+          <StatusIcon status={entry.status} />
           <span className="text-sm">
             {entry.name}{" "}
             <span className="font-mono text-xs text-muted">{entry.id}</span>

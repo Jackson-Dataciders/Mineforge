@@ -3,6 +3,7 @@ import { customRecipeProblem } from "@/domain/custom-recipe";
 import {
   entrySchema,
   isItemEntry,
+  summarizeEntry,
   linkedEntryIds,
   usedRecipeTypes,
   withoutRelationsTo,
@@ -16,6 +17,7 @@ import { readCached } from "./cached";
 import { encodeDocument, readDocument, type Versioned } from "./documents";
 import { gitBlobSha } from "./git-sha";
 import { paths } from "./paths";
+import { pruneTasksChange } from "./task-prune";
 import {
   NotFoundError,
   ValidationError,
@@ -26,7 +28,8 @@ import {
 /**
  * Custom mod entries, one file each (spec 04, ADR 0021). An entry and its
  * icon are written in one commit; deleting an entry also removes manual
- * relations to it from the mod's other entries, in the same commit.
+ * relations to it from the mod's other entries, in the same commit. Updates
+ * and deletes also prune stale in-progress task state (ADR 0022).
  */
 
 /** Icon change on save: new PNG bytes, `null` to remove, `undefined` to keep. */
@@ -210,10 +213,22 @@ export async function updateEntry(
     icon === null && !removeIcon ? undefined : icon,
   );
   if (iconFile) changes.push(iconFile);
+  const expected: Record<string, string | null> = { [file]: expectedSha };
+  // A status change can close a generated task: drop its in-progress state.
+  const prune = await pruneTasksChange(
+    storage,
+    modId,
+    entries.map((e) => summarizeEntry(e.data.id === data.id ? data : e.data)),
+    mod.data.phase,
+  );
+  if (prune.change) changes.push(prune.change);
+  expected[prune.path] = prune.sha;
+  // The prune used this phase: a concurrent phase change is a conflict.
+  expected[paths.customModFile(modId)] = mod.sha;
   await storage.commit({
     message: `data: update entry ${data.id}`,
     changes,
-    expected: { [file]: expectedSha },
+    expected,
   });
   return { data, sha: gitBlobSha(content) };
 }
@@ -228,6 +243,7 @@ export async function deleteEntry(
   path: string,
   expectedSha: string,
 ): Promise<void> {
+  const mod = await requireMod(storage, modId);
   const current = await getEntry(storage, modId, path);
   if (!current) throw new NotFoundError(`entry ${modId}:${path}`);
   const id = current.data.id;
@@ -252,6 +268,17 @@ export async function deleteEntry(
       changes.push({ path: iconFile, content: null });
     }
   }
+  // Done records stay; in-progress state of the entry's tasks goes.
+  const prune = await pruneTasksChange(
+    storage,
+    modId,
+    entries.filter((e) => e.data.id !== id).map((e) => summarizeEntry(e.data)),
+    mod.data.phase,
+  );
+  if (prune.change) changes.push(prune.change);
+  expected[prune.path] = prune.sha;
+  // The prune used this phase: a concurrent phase change is a conflict.
+  expected[paths.customModFile(modId)] = mod.sha;
   await storage.commit({
     message: `data: delete entry ${id}`,
     changes,

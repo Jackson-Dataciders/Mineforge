@@ -727,3 +727,13 @@ export function withEntryId<E extends Entry>(entry: E, id: string): E {
     }),
   } as E;
 }
+
+/** What lists, tasks and other entries' forms show about an entry. */
+export type EntrySummary = Pick<Entry, "id" | "name" | "type" | "status">;
+
+export const summarizeEntry = (entry: Entry): EntrySummary => ({
+  id: entry.id,
+  name: entry.name,
+  type: entry.type,
+  status: entry.status,
+});

@@ -1,6 +1,6 @@
 # 0010. Designer tasks are derived from data
 
-- **Status:** accepted
+- **Status:** accepted (task state refined by [0022](0022-designer-task-state.md))
 - **Date:** 2026-10-25
 
 ## Context

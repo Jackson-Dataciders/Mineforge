@@ -1,4 +1,8 @@
-import { customModSchema, type CustomMod } from "@/domain/custom-mod";
+import {
+  customModSchema,
+  type CustomMod,
+  type ProjectPhase,
+} from "@/domain/custom-mod";
 import {
   customRecipeTypeSchema,
   type CustomRecipeType,
@@ -7,10 +11,13 @@ import { splitEntryId } from "@/domain/entry-id";
 import { isModId } from "@/domain/ids";
 import { modpackSchema } from "@/domain/modpack";
 import { encodeDocument, readDocument, type Versioned } from "./documents";
-import { getEntry } from "./entries";
+import { summarizeEntry } from "@/domain/entry";
+import { getEntry, listEntries } from "./entries";
+import { gitBlobSha } from "./git-sha";
 import { loadLibraryMetas } from "./library";
 import { listModpacks } from "./modpacks";
 import { paths } from "./paths";
+import { pruneTasksChange } from "./task-prune";
 import {
   NotFoundError,
   ValidationError,
@@ -177,6 +184,40 @@ export async function setCustomModDependencies(
     expectedSha,
     `data: update dependencies of custom mod ${modId}`,
   );
+}
+
+/**
+ * Sets the mod's current phase (spec 05). Open generated tasks of the old
+ * phase disappear (their in-progress state is pruned in the same commit);
+ * done tasks are kept.
+ */
+export async function setCustomModPhase(
+  storage: StorageBackend,
+  modId: string,
+  phase: ProjectPhase,
+  expectedSha: string,
+): Promise<Versioned<CustomMod>> {
+  const current = await requireCustomMod(storage, modId);
+  const data = customModSchema.parse({ ...current.data, phase });
+  const entries = await listEntries(storage, modId);
+  const prune = await pruneTasksChange(
+    storage,
+    modId,
+    entries.map((e) => summarizeEntry(e.data)),
+    phase,
+  );
+  const file = paths.customModFile(modId);
+  const content = encodeDocument(customModSchema, data);
+  const changes: FileChange[] = [{ path: file, content }];
+  const expected: Record<string, string | null> = { [file]: expectedSha };
+  if (prune.change) changes.push(prune.change);
+  expected[prune.path] = prune.sha;
+  await storage.commit({
+    message: `data: set phase of custom mod ${modId} to ${phase}`,
+    changes,
+    expected,
+  });
+  return { data, sha: gitBlobSha(content) };
 }
 
 /** The machine must be a block or multiblock entry of the same mod. */

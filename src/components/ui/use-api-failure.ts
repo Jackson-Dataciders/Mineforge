@@ -23,6 +23,7 @@ const ERROR_KEYS: Record<string, MessageKey> = {
   invalidRecipe: "errors.invalidRecipe",
   invalidIcon: "errors.invalidIcon",
   invalidMachine: "errors.invalidMachine",
+  taskNotMovable: "errors.taskNotMovable",
 };
 
 /** Message key for an API error code. */
@@ -31,7 +32,7 @@ export const apiErrorKey = (code: string): MessageKey =>
 
 /**
  * Standard handling of a failed API call: a toast with the error, and on a
- * conflict, not-found or stale-mod error a reload, so the user retries on
+ * conflict, not-found, stale-mod or stale-task error a reload, so the user retries on
  * fresh data instead of overwriting (ADR 0002).
  */
 export function useApiFailure() {
@@ -41,7 +42,9 @@ export function useApiFailure() {
   return useCallback(
     (error: string) => {
       toast(t(apiErrorKey(error)), error === "conflict" ? "info" : "error");
-      if (["conflict", "notFound", "unknownMod"].includes(error)) {
+      if (
+        ["conflict", "notFound", "unknownMod", "taskNotMovable"].includes(error)
+      ) {
         router.refresh();
       }
     },
