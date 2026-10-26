@@ -13,7 +13,7 @@ import { getT } from "@/i18n/server";
 import { requireUser } from "@/server/session";
 import { getStorage, loadCustomMods, loadModpacks } from "@/storage";
 import { loadLibraryMetas } from "@/storage/library";
-import { loadPackItemSources } from "@/storage/pack-items";
+import { loadPackItemSources, searchSetOfItemSet } from "@/storage/pack-items";
 import { readPackTasks } from "@/storage/pack-tasks";
 import { listRecipeChanges } from "@/storage/recipe-changes";
 
@@ -34,7 +34,7 @@ export default async function ModpackPage({
   if (!pack) notFound();
   const t = await getT();
   const storage = await getStorage();
-  const [metas, customMods, changes, tasks, { sources }] = await Promise.all([
+  const [metas, customMods, changes, tasks, itemSet] = await Promise.all([
     loadLibraryMetas(storage),
     loadCustomMods(),
     listRecipeChanges(storage, packId),
@@ -51,7 +51,7 @@ export default async function ModpackPage({
   const missing = missingDependencies(packLibrary, packCustom);
   const incompatible = packLibrary.filter((m) => incompatibilityOf(m));
   const icons = new Map(
-    sources.flatMap((s) => s.items.map((i) => [i.id, i.icon] as const)),
+    searchSetOfItemSet(itemSet).items.map((i) => [i.id, i.icon] as const),
   );
   const itemNames = Object.fromEntries(
     changes.map((c) => [c.data.id, c.data.itemName]),
@@ -168,8 +168,10 @@ export default async function ModpackPage({
                           <span className="font-mono">{change.id}</span>
                         </span>
                       </span>
-                      <span className="rounded-full bg-secondary/13 px-2 text-xs text-text">
-                        {t(`recipeChange.actions.${change.action}`)}
+                      <span className="rounded-full bg-surface">
+                        <span className="block rounded-full bg-secondary/13 px-2 text-xs text-text">
+                          {t(`recipeChange.actions.${change.action}`)}
+                        </span>
                       </span>
                     </Link>
                   </li>

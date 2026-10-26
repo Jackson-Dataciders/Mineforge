@@ -52,6 +52,7 @@ export function IngredientSlot({
   const values = ingredient ? ingredientValues(ingredient) : [];
   const first = values[0];
   const description = describeIngredient(ingredient, lookup, t);
+  const missing = values.some((v) => "item" in v && lookup(v.item)?.missing);
   const name = label ? `${label}: ${description}` : description;
   const content = (
     <>
@@ -73,7 +74,7 @@ export function IngredientSlot({
       )}
     </>
   );
-  const className = `relative inline-flex size-12 shrink-0 items-center justify-center rounded-md border border-border bg-slot ${
+  const className = `relative inline-flex size-12 shrink-0 items-center justify-center rounded-md border bg-slot ${missing ? "border-2 border-danger" : "border-border"} ${
     selected ? "outline-2 outline-offset-1 outline-accent" : ""
   }`;
   if (!onClick) {

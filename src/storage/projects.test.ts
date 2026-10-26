@@ -32,6 +32,7 @@ describe("custom mods", () => {
       name: "Iron Works",
       phase: "planning",
       dependencies: [],
+      recipeTypes: [],
     });
     await expect(
       createCustomMod(storage, { modId: "iron_works", name: "X" }),

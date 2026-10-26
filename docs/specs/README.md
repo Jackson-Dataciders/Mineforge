@@ -16,5 +16,6 @@ Every feature or phase gets a spec **before** implementation starts. A spec is t
 | 01  | [Foundation](01-foundation.md)                          | implemented |
 | 02  | [Jar extraction and import skill](02-jar-extraction.md) | implemented |
 | 03  | [Modpack Planner](03-modpack-planner.md)                | implemented |
+| 04  | [Mod Designer entries](04-mod-designer-entries.md)      | implemented |
 
 Add a row here for every new spec.

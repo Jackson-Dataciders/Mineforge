@@ -7,7 +7,7 @@ Private, single-user web app for planning Minecraft 1.21.1 NeoForge mods and mod
 - The private GitHub repo is the database. Next.js on Vercel reads and writes it through the GitHub API.
 - UI in English and German.
 
-**Current state:** phases 1 (foundation), 2 (jar extraction, `tools/extract-jar.ts`) and 3 (Modpack Planner: library, upload, recipe changes, KubeJS export, pack tasks) are done. Anything marked "planned" in `docs/architecture.md` does not exist yet.
+**Current state:** phases 1 (foundation), 2 (jar extraction, `tools/extract-jar.ts`), 3 (Modpack Planner: library, upload, recipe changes, KubeJS export, pack tasks) and 4 (Mod Designer entries: types, recipes, custom recipe types, pixel editor) are done. Anything marked "planned" in `docs/architecture.md` does not exist yet.
 
 ## Commands
 

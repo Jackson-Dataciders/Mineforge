@@ -67,7 +67,13 @@ export default async function LibraryPage() {
                 const compat = targetCompatibility(meta);
                 return (
                   <li key={meta.modId} className="flex items-start gap-3 p-3">
-                    <ItemIcon icon={meta.logo} size={40} smooth />
+                    <ItemIcon
+                      icon={
+                        meta.logo ? { kind: "texture", path: meta.logo } : null
+                      }
+                      size={40}
+                      smooth
+                    />
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span className="font-medium">{meta.name}</span>

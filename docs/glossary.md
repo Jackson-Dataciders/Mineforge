@@ -8,7 +8,7 @@ These terms are canonical. Use them, with exactly these meanings, in code identi
 
 **Modpack** — A named set of references to library mods and custom mods, plus its recipe changes and manual tasks. Stored in `data/modpacks/<pack-id>/`. It references mods by ID and never copies their data. Code: `Modpack`.
 
-**Entry** — One planned piece of content in a custom mod. Stored as `data/custom-mods/<modid>/entries/<entry-id>.json`. Every entry has an ID, a name, an entry type, a status, type-specific fields, and optionally recipes, an icon and relations to other entries. Code: `Entry`.
+**Entry** — One planned piece of content in a custom mod. Stored as `data/custom-mods/<modid>/entries/<path>.json`, where the entry ID is `<modid>:<path>` (ADR 0021). Every entry has an ID, a name, an entry type, a status, type-specific fields, and optionally recipes, an icon and relations to other entries. Code: `Entry`.
 
 **Entry type** — The top-level category of an entry, stored in its `type` field. Exactly one of: `item`, `block`, `entity`, `structure`, `mechanic`, `multiblock`. It decides which fields the entry has (ADR 0009). Code: `EntryType`.
 
@@ -27,3 +27,7 @@ These terms are canonical. Use them, with exactly these meanings, in code identi
 **Recipe change** — One modification to a modpack's recipes: add, remove or replace a recipe. Stored as `data/modpacks/<pack-id>/recipe-changes/<change-id>.json`; the change ID is also its KubeJS slug. Exported to KubeJS, one script per change (ADR 0008, 0018, 0020). Code: `RecipeChange`.
 
 **Inferred data** — Library records (items, recipes) that the `import-mods` skill added from decompiled code rather than extracted from jar data files. Marked `"source": "inferred"` with an `"evidence"` field naming the class and method. The UI must show them as inferred. The opposite is `"source": "extracted"`.
+
+**Relation** — A manual, typed link from one entry to another entry of the same custom mod: `drops_from`, `part_of_multiblock`, `generated_in_structure`, `powers` or `custom` (with a label). Stored on the source entry; shown as edges in the mind map (phase 6). Code: `Relation`.
+
+**Custom machine recipe type** — A recipe type a custom mod defines for one of its machines (a block or multiblock entry), with item/fluid/energy input slots, item/fluid output slots (optionally with chance) and optional parameters (processing time, energy cost). Stored in `mod.json` `recipeTypes`; recipes of the type get a generated editor (ADR 0021). Code: `CustomRecipeType`.

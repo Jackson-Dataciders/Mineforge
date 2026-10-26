@@ -2,7 +2,7 @@ import { z } from "zod";
 import { resourceIdSchema } from "@/domain/library";
 import { recipeChangeEditSchema } from "@/domain/recipe-change";
 import { getStorage, ValidationError } from "@/storage";
-import { loadPackItemSources } from "@/storage/pack-items";
+import { findItem, loadPackItemSources } from "@/storage/pack-items";
 import { createRecipeChange } from "@/storage/recipe-changes";
 import { apiRoute, readJson } from "../../../_lib/route";
 
@@ -21,10 +21,7 @@ export const POST = apiRoute(async (request, { params }: Context) => {
   const { packId } = await params;
   const { item, change } = body.parse(await readJson(request));
   const storage = await getStorage();
-  const { sources } = await loadPackItemSources(storage, packId);
-  const found = sources
-    .flatMap((s) => s.items)
-    .find((candidate) => candidate.id === item);
+  const found = findItem(await loadPackItemSources(storage, packId), item);
   if (!found) throw new ValidationError("itemNotInPack");
 
   const created = await createRecipeChange(storage, packId, {

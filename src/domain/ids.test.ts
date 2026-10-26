@@ -36,6 +36,7 @@ describe("project schemas", () => {
       name: "Abc",
       phase: "planning",
       dependencies: [],
+      recipeTypes: [],
     });
     expect(
       customModSchema.safeParse({ modId: "abc", name: "Abc", extra: 1 })

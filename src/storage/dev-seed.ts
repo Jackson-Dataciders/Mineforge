@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { devSeedDir } from "@/server/dev-fake";
+import { defaultEntry, entrySchema } from "@/domain/entry";
 import { encodeJson } from "@/lib/stable-json";
 import { MemoryBackend } from "./memory-backend";
 
@@ -240,6 +241,53 @@ function folderFiles(dir: string): Record<string, Uint8Array> {
   return files;
 }
 
+/** A few entries of the example custom mod (spec 04). */
+function exampleEntries(): Record<string, Uint8Array> {
+  const entry = (value: Record<string, unknown>) => {
+    const parsed = entrySchema.parse(value);
+    const path = parsed.id.split(":")[1]!;
+    return [
+      `data/custom-mods/example_mod/entries/${path}.json`,
+      encodeJson(parsed),
+    ] as const;
+  };
+  return Object.fromEntries([
+    entry({
+      ...defaultEntry("item", "example_mod:copper_gear", "Copper Gear"),
+      status: "planned",
+      icon: true,
+      tags: ["machine parts"],
+      recipes: [
+        {
+          type: "minecraft:crafting_shaped",
+          pattern: [
+            null,
+            { item: "minecraft:iron_ingot" },
+            null,
+            { item: "minecraft:iron_ingot" },
+            { tag: "c:rods/wooden" },
+            { item: "minecraft:iron_ingot" },
+            null,
+            { item: "minecraft:iron_ingot" },
+            null,
+          ],
+          result: { id: "example_mod:copper_gear", count: 1 },
+        },
+      ],
+    }),
+    entry({
+      ...defaultEntry("block", "example_mod:smelter", "Smelter"),
+      hasBlockEntity: true,
+      gui: { hasGui: true, slots: "1 input, 1 fuel, 1 output" },
+    }),
+    entry({
+      ...defaultEntry("mechanic", "example_mod:heat", "Heat"),
+      involvedEntries: ["example_mod:smelter"],
+      relations: [{ type: "powers", target: "example_mod:smelter" }],
+    }),
+  ]);
+}
+
 const globalStore = globalThis as { __mineforgeDevStorage?: MemoryBackend };
 
 /**
@@ -256,13 +304,29 @@ export function devMemoryBackend(): MemoryBackend {
         name: "Example Mod",
         phase: "planning",
         dependencies: ["gamma_lib"],
+        recipeTypes: [
+          {
+            id: "melting",
+            name: "Melting",
+            machine: "example_mod:smelter",
+            inputs: [{ type: "item" }, { type: "energy" }],
+            outputs: [
+              { type: "fluid", chance: false },
+              { type: "item", chance: true },
+            ],
+            parameters: { processingTime: true, energyCost: false },
+          },
+        ],
       }),
+      // The Copper Gear's icon (sample PNG).
+      "assets/icons/example_mod/copper_gear.png": SAMPLE_PNG,
       "data/modpacks/starter-pack/pack.json": encodeJson({
         id: "starter-pack",
         name: "Starter Pack",
         libraryModIds: [],
         customModIds: ["example_mod"],
       }),
+      ...exampleEntries(),
       ...(seedDir ? folderFiles(seedDir) : fixtureFiles()),
     });
   }

@@ -1,7 +1,14 @@
 import { customModSchema, type CustomMod } from "@/domain/custom-mod";
+import {
+  customRecipeTypeSchema,
+  type CustomRecipeType,
+} from "@/domain/custom-recipe";
+import { splitEntryId } from "@/domain/entry-id";
 import { isModId } from "@/domain/ids";
 import { modpackSchema } from "@/domain/modpack";
 import { encodeDocument, readDocument, type Versioned } from "./documents";
+import { getEntry } from "./entries";
+import { loadLibraryMetas } from "./library";
 import { listModpacks } from "./modpacks";
 import { paths } from "./paths";
 import {
@@ -128,4 +135,137 @@ export async function deleteCustomMod(
     changes,
     expected,
   });
+}
+
+async function writeMod(
+  storage: StorageBackend,
+  data: CustomMod,
+  expectedSha: string,
+  message: string,
+): Promise<Versioned<CustomMod>> {
+  const { sha } = await storage.writeFile(
+    paths.customModFile(data.modId),
+    encodeDocument(customModSchema, data),
+    expectedSha,
+    message,
+  );
+  return { data: customModSchema.parse(data), sha };
+}
+
+async function requireCustomMod(storage: StorageBackend, modId: string) {
+  const current = await getCustomMod(storage, modId);
+  if (!current) throw new NotFoundError(`custom mod ${modId}`);
+  return current;
+}
+
+/** Sets the library mods this custom mod depends on; every ID must exist. */
+export async function setCustomModDependencies(
+  storage: StorageBackend,
+  modId: string,
+  dependencies: string[],
+  expectedSha: string,
+): Promise<Versioned<CustomMod>> {
+  const current = await requireCustomMod(storage, modId);
+  const metas = await loadLibraryMetas(storage);
+  const unique = [...new Set(dependencies)].sort();
+  if (unique.some((id) => !metas.has(id))) {
+    throw new ValidationError("unknownMod");
+  }
+  return writeMod(
+    storage,
+    { ...current.data, dependencies: unique },
+    expectedSha,
+    `data: update dependencies of custom mod ${modId}`,
+  );
+}
+
+/** The machine must be a block or multiblock entry of the same mod. */
+async function checkMachine(
+  storage: StorageBackend,
+  modId: string,
+  type: CustomRecipeType,
+) {
+  const { modId: machineMod, path } = splitEntryId(type.machine);
+  const machine =
+    machineMod === modId ? await getEntry(storage, modId, path) : null;
+  if (
+    !machine ||
+    (machine.data.type !== "block" && machine.data.type !== "multiblock")
+  ) {
+    throw new ValidationError("invalidMachine");
+  }
+}
+
+export async function createRecipeType(
+  storage: StorageBackend,
+  modId: string,
+  input: unknown,
+  expectedSha: string,
+): Promise<Versioned<CustomMod>> {
+  const current = await requireCustomMod(storage, modId);
+  const type = customRecipeTypeSchema.parse(input);
+  if (current.data.recipeTypes.some((t) => t.id === type.id)) {
+    throw new ValidationError("idTaken");
+  }
+  await checkMachine(storage, modId, type);
+  return writeMod(
+    storage,
+    { ...current.data, recipeTypes: [...current.data.recipeTypes, type] },
+    expectedSha,
+    `data: add recipe type ${modId}/${type.id}`,
+  );
+}
+
+/**
+ * Replaces a recipe type (same ID). Recipes of the type that no longer
+ * match are flagged in the entry form and must be fixed before that entry
+ * can be saved again.
+ */
+export async function updateRecipeType(
+  storage: StorageBackend,
+  modId: string,
+  typeId: string,
+  input: unknown,
+  expectedSha: string,
+): Promise<Versioned<CustomMod>> {
+  const current = await requireCustomMod(storage, modId);
+  const type = customRecipeTypeSchema.parse(input);
+  if (type.id !== typeId) throw new ValidationError("invalidId");
+  if (!current.data.recipeTypes.some((t) => t.id === typeId)) {
+    throw new NotFoundError(`recipe type ${typeId}`);
+  }
+  await checkMachine(storage, modId, type);
+  return writeMod(
+    storage,
+    {
+      ...current.data,
+      recipeTypes: current.data.recipeTypes.map((t) =>
+        t.id === typeId ? type : t,
+      ),
+    },
+    expectedSha,
+    `data: update recipe type ${modId}/${typeId}`,
+  );
+}
+
+/** Removes a recipe type; recipes and multiblocks using it show it as missing. */
+export async function deleteRecipeType(
+  storage: StorageBackend,
+  modId: string,
+  typeId: string,
+  expectedSha: string,
+): Promise<Versioned<CustomMod>> {
+  const current = await requireCustomMod(storage, modId);
+  if (!current.data.recipeTypes.some((t) => t.id === typeId)) {
+    throw new NotFoundError(`recipe type ${typeId}`);
+  }
+  return writeMod(
+    storage,
+    {
+      ...current.data,
+      recipeTypes: current.data.recipeTypes.filter((t) => t.id !== typeId),
+    },
+    expectedSha,
+    `data: delete recipe type ${modId}/${typeId}`,
+  );
 }

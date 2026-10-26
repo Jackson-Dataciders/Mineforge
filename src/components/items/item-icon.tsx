@@ -1,7 +1,9 @@
 import { Box, Tag } from "lucide-react";
+import type { IconRef } from "@/domain/item-search";
 
-/** URL of an extracted texture, served behind auth (ADR 0004), never from public/. */
-export const textureUrl = (iconPath: string) => `/api/textures/${iconPath}`;
+/** URL of an icon file, served behind auth (ADR 0004), never from public/. */
+export const iconUrl = (icon: IconRef) =>
+  `/api/${icon.kind === "texture" ? "textures" : "icons"}/${icon.path}`;
 
 /**
  * An item icon from `assets/textures/` (pixelated), or a placeholder box.
@@ -13,7 +15,7 @@ export function ItemIcon({
   size = 32,
   smooth = false,
 }: {
-  icon: string | null | undefined;
+  icon: IconRef | null | undefined;
   kind?: "item" | "tag";
   size?: number;
   /** Logos are not pixel art; scale them smoothly. */
@@ -41,7 +43,7 @@ export function ItemIcon({
     // A plain <img>: next/image would fetch through /_next/image without the session.
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={textureUrl(icon)}
+      src={iconUrl(icon)}
       alt=""
       width={size}
       height={size}

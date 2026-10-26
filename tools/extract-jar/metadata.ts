@@ -128,7 +128,9 @@ function fabricIcon(icon: unknown): string | null {
   if (!isTable(icon)) return null;
   const sizes = Object.entries(icon)
     .map(([size, path]) => [Number(size), str(path)] as const)
-    .filter((e): e is readonly [number, string] => Number.isFinite(e[0]) && !!e[1])
+    .filter(
+      (e): e is readonly [number, string] => Number.isFinite(e[0]) && !!e[1],
+    )
     .sort((a, b) => a[0] - b[0]);
   const fitting = sizes.filter(([size]) => size <= 256);
   return (fitting.at(-1) ?? sizes[0])?.[1] ?? null;

@@ -18,6 +18,11 @@ const ERROR_KEYS: Record<string, MessageKey> = {
   unknownMod: "errors.unknownMod",
   notManualTask: "errors.notManualTask",
   itemNotInPack: "errors.itemNotInPack",
+  unknownEntry: "errors.unknownEntry",
+  unknownRecipeType: "errors.unknownRecipeType",
+  invalidRecipe: "errors.invalidRecipe",
+  invalidIcon: "errors.invalidIcon",
+  invalidMachine: "errors.invalidMachine",
 };
 
 /** Message key for an API error code. */

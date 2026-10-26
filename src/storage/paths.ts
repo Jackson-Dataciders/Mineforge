@@ -4,6 +4,11 @@ export const paths = {
   customModDir: (modId: string) => `data/custom-mods/${modId}`,
   customModFile: (modId: string) => `data/custom-mods/${modId}/mod.json`,
   customModIconsDir: (modId: string) => `assets/icons/${modId}`,
+  entriesDir: (modId: string) => `data/custom-mods/${modId}/entries`,
+  entryFile: (modId: string, path: string) =>
+    `data/custom-mods/${modId}/entries/${path}.json`,
+  entryIconFile: (modId: string, path: string) =>
+    `assets/icons/${modId}/${path}.png`,
   modpacksDir: "data/modpacks",
   modpackDir: (packId: string) => `data/modpacks/${packId}`,
   modpackFile: (packId: string) => `data/modpacks/${packId}/pack.json`,
@@ -22,7 +27,4 @@ export const paths = {
 } as const;
 
 export type LibraryFileName =
-  | "meta.json"
-  | "items.json"
-  | "recipes.json"
-  | "tags.json";
+  "meta.json" | "items.json" | "recipes.json" | "tags.json";

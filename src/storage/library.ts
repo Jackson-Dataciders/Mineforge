@@ -7,26 +7,14 @@ import {
   libraryRecipesSchema,
   type LibraryMeta,
 } from "@/domain/library";
-import { decodeJson } from "@/lib/stable-json";
+import { readCached } from "./cached";
 import { paths, type LibraryFileName } from "./paths";
 import type { StorageBackend } from "./types";
 
 /**
  * Read access to library and vanilla data (written only by the import,
- * ADR 0006). Parsed files are cached in memory by path and blob SHA, so a
- * warm server instance re-reads only files that changed.
+ * ADR 0006). Parsed files go through the SHA-keyed cache in `cached.ts`.
  */
-
-const CACHE_LIMIT = 64;
-const parsedCache = new Map<string, unknown>();
-
-function remember(key: string, value: unknown) {
-  parsedCache.delete(key);
-  parsedCache.set(key, value);
-  while (parsedCache.size > CACHE_LIMIT) {
-    parsedCache.delete(parsedCache.keys().next().value!);
-  }
-}
 
 /** Blob SHAs of all library and vanilla files (two listing calls). */
 async function dataIndex(
@@ -44,28 +32,14 @@ async function dataIndex(
   ]);
 }
 
-async function readCached<S extends z.ZodType>(
+function readIndexed<S extends z.ZodType>(
   storage: StorageBackend,
   index: Map<string, string>,
   path: string,
   schema: S,
 ): Promise<z.output<S> | null> {
   const sha = index.get(path);
-  if (!sha) return null;
-  const key = `${path}@${sha}`;
-  if (parsedCache.has(key)) {
-    const value = parsedCache.get(key) as z.output<S>;
-    remember(key, value);
-    return value;
-  }
-  const file = await storage.readFile(path);
-  if (!file) return null;
-  const parsed = schema.safeParse(decodeJson(file.content));
-  if (!parsed.success) {
-    throw new Error(`Invalid data in ${path}: ${parsed.error.message}`);
-  }
-  remember(`${path}@${file.sha}`, parsed.data);
-  return parsed.data;
+  return sha ? readCached(storage, path, sha, schema) : Promise.resolve(null);
 }
 
 /** Library mod folder IDs that have a `meta.json`. */
@@ -109,19 +83,19 @@ export async function loadLibraryOverview(
     await Promise.all(
       libraryModIds(index).map(async (modId) => {
         const [meta, items, recipes] = await Promise.all([
-          readCached(
+          readIndexed(
             storage,
             index,
             modFile(modId, "meta.json"),
             libraryMetaSchema,
           ),
-          readCached(
+          readIndexed(
             storage,
             index,
             modFile(modId, "items.json"),
             libraryItemsSchema,
           ),
-          readCached(
+          readIndexed(
             storage,
             index,
             modFile(modId, "recipes.json"),
@@ -168,7 +142,7 @@ export async function loadLibraryMetas(
       async (modId) =>
         [
           modId,
-          await readCached(
+          await readIndexed(
             storage,
             index,
             modFile(modId, "meta.json"),
@@ -197,7 +171,7 @@ export async function loadItemSources(
     const meta =
       modId === null
         ? null
-        : await readCached(
+        : await readIndexed(
             storage,
             index,
             modFile(modId, "meta.json"),
@@ -205,9 +179,9 @@ export async function loadItemSources(
           );
     if (modId !== null && !meta) return null;
     const [items, recipes, tags] = await Promise.all([
-      readCached(storage, index, file("items.json"), libraryItemsSchema),
-      readCached(storage, index, file("recipes.json"), libraryRecipesSchema),
-      readCached(storage, index, file("tags.json"), itemTagsSchema),
+      readIndexed(storage, index, file("items.json"), libraryItemsSchema),
+      readIndexed(storage, index, file("recipes.json"), libraryRecipesSchema),
+      readIndexed(storage, index, file("tags.json"), itemTagsSchema),
     ]);
     if (modId === null && !items) return null;
     return {

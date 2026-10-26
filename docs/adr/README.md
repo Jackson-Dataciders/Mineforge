@@ -24,3 +24,4 @@ An ADR records one decision that is hard to reverse or affects other features. W
 | 0018 | [One KubeJS script per recipe change](0018-kubejs-script-per-recipe-change.md)                                   | accepted                              |
 | 0019 | [Mod logo in library meta](0019-mod-logo-in-library-meta.md)                                                     | accepted                              |
 | 0020 | [Recipe change and pack task formats](0020-recipe-change-and-pack-task-formats.md)                               | accepted                              |
+| 0021 | [Entry and custom recipe type formats](0021-entry-and-custom-recipe-type-formats.md)                             | accepted                              |

@@ -1,13 +1,24 @@
 import { compareCodeUnits } from "@/lib/stable-json";
+import type { EntryStatus } from "./entry";
 import type { DataSource } from "./library";
+
+/**
+ * An icon file: an extracted texture under `assets/textures/` or an entry
+ * icon drawn in the pixel editor under `assets/icons/`.
+ */
+export type IconRef = { kind: "texture" | "icon"; path: string };
 
 /** What the item search modal shows per item (names are always English). */
 export type SearchItem = {
   id: string;
   name: string;
-  /** Path under `assets/textures/`, or `null`. */
-  icon: string | null;
-  source: DataSource;
+  icon: IconRef | null;
+  /** Library data source, or `entry` for a custom mod entry. */
+  source: DataSource | "entry";
+  /** Only for entries. */
+  status?: EntryStatus;
+  /** Set by the designer for an ID that is not in the item set (ADR 0021). */
+  missing?: true;
   /** Display name of the mod (or "Minecraft"). */
   modName: string;
 };
