@@ -1,0 +1,21 @@
+{
+  "description": "",
+  "fireResistant": false,
+  "icon": true,
+  "id": "soulflow_engineering:crystallized_soul",
+  "kind": "material",
+  "name": "Crystallized Soul",
+  "notes": "",
+  "obtainedVia": [
+    "drop"
+  ],
+  "rarity": "common",
+  "recipes": [],
+  "relations": [],
+  "stackSize": 64,
+  "status": "backlog",
+  "tags": [],
+  "tooltip": "The crystallized essence of life!",
+  "type": "item",
+  "usage": "Main Early Game Crafting Material. Dropped from Mobs with the Soulflow effect."
+}
