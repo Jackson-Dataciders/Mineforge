@@ -1,0 +1,77 @@
+{
+  "blastResistance": 6,
+  "description": "",
+  "drops": {
+    "type": "self"
+  },
+  "fullCube": true,
+  "gui": {
+    "hasGui": false
+  },
+  "hardness": 1.5,
+  "harvest": {
+    "tier": "iron",
+    "tool": "pickaxe"
+  },
+  "hasBlockEntity": true,
+  "hasBlockItem": true,
+  "icon": true,
+  "id": "soulflow_engineering:crystallized_soul_block",
+  "lightLevel": 7,
+  "name": "Crystallized Soul Block",
+  "notes": "",
+  "recipes": [
+    {
+      "pattern": [
+        {
+          "item": "soulflow_engineering:crystallized_soul"
+        },
+        {
+          "item": "soulflow_engineering:crystallized_soul"
+        },
+        {
+          "item": "soulflow_engineering:crystallized_soul"
+        },
+        {
+          "item": "soulflow_engineering:crystallized_soul"
+        },
+        {
+          "item": "soulflow_engineering:crystallized_soul"
+        },
+        {
+          "item": "soulflow_engineering:crystallized_soul"
+        },
+        {
+          "item": "soulflow_engineering:crystallized_soul"
+        },
+        {
+          "item": "soulflow_engineering:crystallized_soul"
+        },
+        {
+          "item": "soulflow_engineering:crystallized_soul"
+        }
+      ],
+      "result": {
+        "count": 1,
+        "id": "soulflow_engineering:crystallized_soul_block"
+      },
+      "type": "minecraft:crafting_shaped"
+    }
+  ],
+  "redstone": "",
+  "relations": [
+    {
+      "label": "Compressed Variant",
+      "target": "soulflow_engineering:crystallized_soul",
+      "type": "custom"
+    }
+  ],
+  "status": "backlog",
+  "tags": [
+    "Compressed Item"
+  ],
+  "transparent": false,
+  "type": "block",
+  "usage": "Crafting Material, Building Block, Part of Multiblock",
+  "variants": ""
+}
