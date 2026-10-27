@@ -1,5 +1,7 @@
 {
-  "customModIds": [],
+  "customModIds": [
+    "soulflow_engineering"
+  ],
   "id": "arcane-engineering",
   "libraryModIds": [],
   "name": "Arcane Engineering"
