@@ -59,13 +59,7 @@
     }
   ],
   "redstone": "",
-  "relations": [
-    {
-      "label": "Compressed Variant",
-      "target": "soulflow_engineering:crystallized_soul",
-      "type": "custom"
-    }
-  ],
+  "relations": [],
   "status": "backlog",
   "tags": [
     "Compressed Item"
