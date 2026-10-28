@@ -1,12 +1,12 @@
 {
   "positions": {
     "soulflow_engineering:crystallized_soul": {
-      "x": 567,
-      "y": -62
+      "x": 12,
+      "y": 12
     },
     "soulflow_engineering:crystallized_soul_block": {
-      "x": 1021,
-      "y": 179
+      "x": 316,
+      "y": 12
     }
   }
 }
