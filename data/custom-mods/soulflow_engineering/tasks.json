@@ -1,7 +1,9 @@
 {
   "generated": {
     "plan_out:soulflow_engineering:crystallized_soul": {
-      "column": "in_progress"
+      "column": "done",
+      "entryName": "Crystallized Soul",
+      "entryType": "item"
     }
   },
   "manual": []
